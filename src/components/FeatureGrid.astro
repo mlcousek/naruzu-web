@@ -1,0 +1,74 @@
+---
+/**
+ * A responsive grid (1 -> 2 -> 3 or 4 columns) for Cards or any blocks, with
+ * staggered reveal-on-scroll. Pass `items` for the simple case, or use the
+ * default slot for full control.
+ *
+ *   <FeatureGrid items={[{ title: "Routes", text: "...", href: "/docs/user/routes/" }]} />
+ *   <FeatureGrid columns={2}><Card ... /><Card ... /></FeatureGrid>
+ */
+import Card from "./Card.astro";
+import Reveal from "./Reveal.astro";
+import type { SceneryName } from "./Scenery.astro";
+
+export interface Feature {
+  title: string;
+  text: string;
+  href?: string;
+  label?: string;
+  image?: SceneryName;
+}
+
+interface Props {
+  items?: Feature[];
+  columns?: 2 | 3 | 4;
+  headingLevel?: 2 | 3 | 4;
+  class?: string;
+}
+const { items, columns = 3, headingLevel = 3, class: className } = Astro.props;
+---
+
+<ul
+  class:list={["nz-feature-grid", className]}
+  style={`--nz-cols: ${columns}`}
+  role="list"
+>
+  {items ? (
+    items.map((item, i) => (
+      <Reveal as="li" delay={(i % columns) * 90}>
+        <Card
+          title={item.title}
+          href={item.href}
+          label={item.label}
+          image={item.image}
+          headingLevel={headingLevel}
+        >
+          <p>{item.text}</p>
+        </Card>
+      </Reveal>
+    ))
+  ) : (
+    <slot />
+  )}
+</ul>
+
+<style>
+  .nz-feature-grid {
+    display: grid;
+    gap: var(--nz-space-5);
+    grid-template-columns: 1fr;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  @media (min-width: 40rem) {
+    .nz-feature-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 64rem) {
+    .nz-feature-grid {
+      grid-template-columns: repeat(var(--nz-cols), minmax(0, 1fr));
+    }
+  }
+</style>

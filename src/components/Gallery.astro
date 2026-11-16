@@ -1,0 +1,299 @@
+---
+/**
+ * Screenshot gallery with a keyboard-accessible lightbox (native <dialog>):
+ * each thumbnail is a link to the full image, so without JavaScript it opens
+ * the image itself. With JavaScript it opens a modal with Previous/Next
+ * (buttons and arrow keys), Esc or Close to leave, and focus returns to the
+ * thumbnail.
+ */
+import { getImage } from "astro:assets";
+import Shot from "./Shot.astro";
+import { SHOTS, SHOT_ALT, type ShotName } from "../lib/shots";
+
+interface Item {
+  name: ShotName;
+  caption: string;
+}
+interface Props {
+  items: Item[];
+}
+const { items } = Astro.props;
+
+const full = await Promise.all(
+  items.map(async (item) => {
+    const src = SHOTS[item.name];
+    const image = await getImage({
+      src,
+      format: "webp",
+      width: Math.min(1600, src.width),
+      quality: 80,
+    });
+    return { ...item, href: image.src, alt: SHOT_ALT[item.name] };
+  }),
+);
+---
+
+<div class="gallery" data-gallery>
+  <ul class="gallery__grid" role="list">
+    {full.map((item, i) => (
+      <li
+        class:list={[
+          "gallery__item",
+          {
+            "gallery__item--tall":
+              SHOTS[item.name].height > SHOTS[item.name].width,
+          },
+        ]}
+      >
+        <a
+          class="gallery__link"
+          href={item.href}
+          data-index={i}
+          data-full={item.href}
+          data-alt={item.alt}
+          data-caption={item.caption}
+        >
+          <Shot
+            name={item.name}
+            alt={item.alt}
+            sizes="(min-width: 64rem) 30vw, (min-width: 40rem) 46vw, 92vw"
+          />
+          <span class="gallery__caption">{item.caption}</span>
+          <span class="nz-visually-hidden"> (opens a larger view)</span>
+        </a>
+      </li>
+    ))}
+  </ul>
+
+  <dialog class="lightbox" aria-labelledby="lightbox-caption" data-lightbox>
+    <div class="lightbox__body">
+      <figure class="lightbox__figure">
+        <img class="lightbox__img" alt="" data-img decoding="async" />
+        <figcaption class="lightbox__caption" id="lightbox-caption">
+          <span data-caption></span>
+          <span class="lightbox__count" data-count></span>
+        </figcaption>
+      </figure>
+      <div class="lightbox__nav">
+        <button type="button" class="lightbox__btn" data-prev>
+          <span aria-hidden="true">←</span> Previous
+        </button>
+        <button type="button" class="lightbox__btn" data-next>
+          Next <span aria-hidden="true">→</span>
+        </button>
+        <button type="button" class="lightbox__btn lightbox__close" data-close>
+          Close <span aria-hidden="true">×</span>
+        </button>
+      </div>
+    </div>
+  </dialog>
+</div>
+
+<style>
+  .gallery__grid {
+    display: grid;
+    gap: var(--nz-space-4);
+    grid-template-columns: 1fr;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  @media (min-width: 40rem) {
+    .gallery__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 64rem) {
+    .gallery__grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  .gallery__link {
+    position: relative;
+    display: block;
+    height: 100%;
+    overflow: hidden;
+    border: 1px solid var(--nz-line);
+    border-radius: var(--nz-radius);
+    background: #031d25;
+    color: #f4f7f4;
+    text-decoration: none;
+    transition:
+      border-color var(--nz-dur) ease,
+      transform var(--nz-dur) var(--nz-ease-out);
+  }
+  .gallery__link:hover {
+    border-color: var(--nz-accent);
+    color: #f4f7f4;
+  }
+  .gallery__link :global(img) {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    object-position: top center;
+    transition: transform var(--nz-dur-slow) var(--nz-ease-out);
+  }
+  .gallery__item--tall .gallery__link :global(img) {
+    object-position: top center;
+  }
+  .gallery__caption {
+    position: absolute;
+    inset: auto 0 0;
+    padding: 2.5rem 1rem 0.8rem;
+    background: linear-gradient(0deg, #031d25f2 30%, #031d2500);
+    font-size: var(--nz-fs-sm);
+    font-weight: 700;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .gallery__link:hover {
+      transform: translateY(-3px);
+    }
+    .gallery__link:hover :global(img) {
+      transform: scale(1.03);
+    }
+  }
+
+  .lightbox {
+    width: min(96vw, 1400px);
+    max-width: none;
+    max-height: 96vh;
+    padding: 0;
+    border: 1px solid var(--nz-line);
+    border-radius: var(--nz-radius-lg);
+    background: var(--nz-bg-raised);
+    color: var(--nz-text);
+  }
+  .lightbox::backdrop {
+    background: #010d11e6;
+    backdrop-filter: blur(4px);
+  }
+  .lightbox__body {
+    display: grid;
+    gap: var(--nz-space-3);
+    padding: var(--nz-space-3);
+  }
+  .lightbox__figure {
+    margin: 0;
+  }
+  .lightbox__img {
+    width: 100%;
+    height: auto;
+    max-height: calc(96vh - 9rem);
+    object-fit: contain;
+    border-radius: var(--nz-radius-sm);
+    background: #031d25;
+  }
+  .lightbox__caption {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--nz-space-3);
+    margin-top: var(--nz-space-2);
+    font-weight: 700;
+  }
+  .lightbox__count {
+    font-family: var(--nz-font-data);
+    color: var(--nz-muted);
+    white-space: nowrap;
+  }
+  .lightbox__nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--nz-space-2);
+  }
+  .lightbox__btn {
+    min-height: var(--nz-target);
+    padding: 0 1rem;
+    border: 1px solid var(--nz-line);
+    border-radius: var(--nz-radius-sm);
+    background: var(--nz-panel);
+    color: var(--nz-text);
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .lightbox__btn:hover {
+    border-color: var(--nz-accent);
+  }
+  .lightbox__close {
+    margin-inline-start: auto;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .lightbox[open] {
+      animation: lb-in var(--nz-dur) var(--nz-ease-out);
+    }
+  }
+  @keyframes lb-in {
+    from {
+      opacity: 0;
+      transform: scale(0.97);
+    }
+  }
+</style>
+
+<script>
+  for (const gallery of document.querySelectorAll<HTMLElement>(
+    "[data-gallery]",
+  )) {
+    const dialog = gallery.querySelector<HTMLDialogElement>("[data-lightbox]")!;
+    if (typeof dialog.showModal !== "function") continue;
+    const links = [
+      ...gallery.querySelectorAll<HTMLAnchorElement>("[data-full]"),
+    ];
+    const img = dialog.querySelector<HTMLImageElement>("[data-img]")!;
+    const caption = dialog.querySelector<HTMLElement>("[data-caption]")!;
+    const count = dialog.querySelector<HTMLElement>("[data-count]")!;
+    let index = 0;
+    let opener: HTMLElement | null = null;
+
+    const show = (i: number) => {
+      index = (i + links.length) % links.length;
+      const link = links[index]!;
+      img.src = link.dataset.full!;
+      img.alt = link.dataset.alt!;
+      caption.textContent = link.dataset.caption!;
+      count.textContent = `${index + 1} of ${links.length}`;
+    };
+    links.forEach((link, i) =>
+      link.addEventListener("click", (event) => {
+        if (
+          event.metaKey ||
+          event.ctrlKey ||
+          event.shiftKey ||
+          event.button !== 0
+        )
+          return;
+        event.preventDefault();
+        opener = link;
+        show(i);
+        dialog.showModal();
+        dialog.querySelector<HTMLButtonElement>("[data-close]")!.focus();
+      }),
+    );
+    dialog
+      .querySelector("[data-prev]")!
+      .addEventListener("click", () => show(index - 1));
+    dialog
+      .querySelector("[data-next]")!
+      .addEventListener("click", () => show(index + 1));
+    dialog
+      .querySelector("[data-close]")!
+      .addEventListener("click", () => dialog.close());
+    dialog.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        show(index - 1);
+      } else if (event.key === "ArrowRight") {
+        event.preventDefault();
+        show(index + 1);
+      }
+    });
+    // A click on the backdrop (outside the body) closes it.
+    dialog.addEventListener("click", (event) => {
+      if (event.target === dialog) dialog.close();
+    });
+    dialog.addEventListener("close", () => {
+      opener?.focus();
+      img.removeAttribute("src");
+    });
+  }
+</script>

@@ -1,0 +1,33 @@
+---
+import Base from "../layouts/Base.astro";
+import Section from "../components/Section.astro";
+import Button from "../components/Button.astro";
+---
+
+<Base
+  title="Page not found"
+  description="This page does not exist on the NARUZU site."
+  noindex
+>
+  <Section
+    as="h1"
+    eyebrow="404"
+    title="This road does not go anywhere"
+    intro="The page may have moved, or the address has a typo. Start again from one of these."
+  >
+    <div class="nz-404-actions">
+      <Button href="/">Go to the home page</Button>
+      <Button href="/docs/user/" variant="secondary">
+        Open the User guide
+      </Button>
+    </div>
+  </Section>
+</Base>
+
+<style>
+  .nz-404-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--nz-space-3);
+  }
+</style>

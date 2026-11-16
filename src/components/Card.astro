@@ -1,0 +1,139 @@
+---
+/**
+ * A glass panel card. With `href` the whole card is one link (the title is the
+ * link text; the rest is extended by a pseudo-element). Optional scenery art,
+ * an eyebrow `label` and an `icon` slot.
+ *
+ *   <Card title="Workouts" href="/docs/user/workouts/" label="Train">Text</Card>
+ */
+import Scenery, { type SceneryName } from "./Scenery.astro";
+import { url } from "../lib/url";
+
+interface Props {
+  title: string;
+  href?: string;
+  label?: string;
+  image?: SceneryName;
+  imagePosition?: string;
+  headingLevel?: 2 | 3 | 4;
+  class?: string;
+}
+const {
+  title,
+  href,
+  label,
+  image,
+  imagePosition,
+  headingLevel = 3,
+  class: className,
+} = Astro.props;
+const Heading = `h${headingLevel}` as "h2" | "h3" | "h4";
+---
+
+<article class:list={["nz-card", { "nz-card--link": href }, className]}>
+  {image && (
+    <div class="nz-card__art">
+      <Scenery
+        name={image}
+        position={imagePosition}
+        sizes="(min-width: 64rem) 30vw, (min-width: 40rem) 45vw, 92vw"
+      />
+    </div>
+  )}
+  <div class="nz-card__body">
+    {Astro.slots.has("icon") && (
+      <div class="nz-card__icon">
+        <slot name="icon" />
+      </div>
+    )}
+    {label && <p class="nz-eyebrow">{label}</p>}
+    <Heading class="nz-card__title">
+      {href ? <a href={url(href)}>{title}</a> : title}
+    </Heading>
+    <div class="nz-card__text">
+      <slot />
+    </div>
+  </div>
+</article>
+
+<style>
+  .nz-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    height: 100%;
+    background: var(--nz-panel);
+    border: 1px solid var(--nz-line);
+    border-radius: var(--nz-radius);
+    box-shadow: var(--nz-shadow);
+    transition:
+      border-color var(--nz-dur) ease,
+      transform var(--nz-dur) var(--nz-ease-out);
+  }
+  .nz-card__art {
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-bottom: 1px solid var(--nz-line-soft);
+  }
+  .nz-card__art :global(picture) {
+    display: block;
+    height: 100%;
+  }
+  .nz-card__art :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--nz-dur-slow) var(--nz-ease-out);
+  }
+  .nz-card__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--nz-space-3);
+    padding: var(--nz-space-5);
+  }
+  .nz-card__icon {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--nz-accent) 14%, transparent);
+    color: var(--nz-accent);
+  }
+  .nz-card__title {
+    font-size: var(--nz-fs-h3);
+    line-height: 1.2;
+  }
+  .nz-card__title a {
+    color: var(--nz-text);
+    text-decoration: none;
+  }
+  .nz-card--link .nz-card__title a::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+  }
+  .nz-card__title a:focus-visible {
+    outline: none;
+  }
+  .nz-card--link:has(a:focus-visible) {
+    outline: var(--nz-focus-ring);
+    outline-offset: var(--nz-focus-offset);
+  }
+  .nz-card__text {
+    color: var(--nz-muted);
+  }
+  .nz-card--link:hover {
+    border-color: var(--nz-accent);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .nz-card--link:hover {
+      transform: translateY(-3px);
+    }
+    .nz-card--link:hover .nz-card__art :global(img) {
+      transform: scale(1.04);
+    }
+  }
+</style>

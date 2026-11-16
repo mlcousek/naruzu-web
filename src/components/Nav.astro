@@ -1,0 +1,239 @@
+---
+/**
+ * The site header: brand, the five primary destinations and the theme toggle.
+ * On narrow screens the links fold into a disclosure menu (a 44 px button with
+ * aria-expanded); without JavaScript they stay visible and wrap.
+ */
+import BrandMark from "./BrandMark.astro";
+import ThemeToggle from "./ThemeToggle.astro";
+import { NAV } from "../config/site";
+import { isCurrent, url } from "../lib/url";
+
+const pathname = Astro.url.pathname;
+---
+
+<header class="nz-nav">
+  <div class="nz-nav__inner nz-container nz-container--wide">
+    <a class="nz-nav__brand" href={url("/")} aria-label="NARUZU home">
+      <BrandMark size={32} />
+      <span class="nz-nav__word" aria-hidden="true">
+        NARUZU
+      </span>
+    </a>
+
+    <button
+      class="nz-nav__menu"
+      type="button"
+      aria-expanded="false"
+      aria-controls="nz-nav-links"
+    >
+      <span class="nz-nav__bars" aria-hidden="true"></span>
+      <span>Menu</span>
+    </button>
+
+    <nav id="nz-nav-links" class="nz-nav__links" aria-label="Main">
+      <ul>
+        {NAV.map((item) => {
+          const current = isCurrent(pathname, item.href, item.section);
+          return (
+            <li>
+              <a
+                href={url(item.href)}
+                aria-current={current ? "page" : undefined}
+              >
+                {item.label}
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
+
+    <ThemeToggle class="nz-nav__theme" />
+  </div>
+</header>
+
+<style>
+  .nz-nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    border-bottom: 1px solid var(--nz-line-soft);
+    background: color-mix(in srgb, var(--nz-bg) 82%, transparent);
+    backdrop-filter: blur(14px) saturate(1.3);
+    -webkit-backdrop-filter: blur(14px) saturate(1.3);
+  }
+  .nz-nav__inner {
+    display: flex;
+    align-items: center;
+    gap: var(--nz-space-4);
+    min-height: var(--nz-nav-h);
+  }
+  .nz-nav__brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    min-height: var(--nz-target);
+    margin-inline-end: auto;
+    color: var(--nz-text);
+    text-decoration: none;
+  }
+  .nz-nav__word {
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: 0.32em;
+  }
+  .nz-nav__links ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--nz-space-1);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .nz-nav__links a {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--nz-target);
+    padding: 0 0.85rem;
+    border-radius: var(--nz-radius-sm);
+    color: var(--nz-muted);
+    font-size: var(--nz-fs-sm);
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color var(--nz-dur-fast) ease;
+  }
+  .nz-nav__links a:hover {
+    color: var(--nz-text);
+  }
+  .nz-nav__links a[aria-current="page"] {
+    color: var(--nz-text);
+  }
+  /* The app rail marks the current page with an amber bar; here it sits under the link. */
+  .nz-nav__links a[aria-current="page"]::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0.85rem;
+    bottom: 6px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--nz-accent);
+  }
+  .nz-nav__menu {
+    display: none;
+    align-items: center;
+    gap: 0.6rem;
+    min-height: var(--nz-target);
+    min-width: var(--nz-target);
+    padding: 0 0.9rem;
+    border: 1px solid var(--nz-line);
+    border-radius: var(--nz-radius-pill);
+    background: var(--nz-panel);
+    color: var(--nz-text);
+    font-size: var(--nz-fs-sm);
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .nz-nav__bars,
+  .nz-nav__bars::before,
+  .nz-nav__bars::after {
+    display: block;
+    width: 16px;
+    height: 2px;
+    border-radius: 2px;
+    background: currentColor;
+    transition: transform var(--nz-dur) var(--nz-ease-out);
+  }
+  .nz-nav__bars {
+    position: relative;
+  }
+  .nz-nav__bars::before,
+  .nz-nav__bars::after {
+    content: "";
+    position: absolute;
+    left: 0;
+  }
+  .nz-nav__bars::before {
+    top: -5px;
+  }
+  .nz-nav__bars::after {
+    top: 5px;
+  }
+  .nz-nav__menu[aria-expanded="true"] .nz-nav__bars {
+    background: transparent;
+  }
+  .nz-nav__menu[aria-expanded="true"] .nz-nav__bars::before {
+    transform: translateY(5px) rotate(45deg);
+  }
+  .nz-nav__menu[aria-expanded="true"] .nz-nav__bars::after {
+    transform: translateY(-5px) rotate(-45deg);
+  }
+
+  @media (max-width: 52rem) {
+    :global(.js) .nz-nav__menu {
+      display: inline-flex;
+    }
+    :global(.js) .nz-nav__links {
+      position: absolute;
+      inset: 100% 0 auto;
+      display: none;
+      padding: var(--nz-space-3) var(--nz-gutter) var(--nz-space-5);
+      border-bottom: 1px solid var(--nz-line);
+      background: var(--nz-bg);
+    }
+    :global(.js) .nz-nav__links[data-open] {
+      display: block;
+    }
+    :global(.js) .nz-nav__links ul {
+      flex-direction: column;
+    }
+    :global(.js) .nz-nav__links a {
+      width: 100%;
+      font-size: var(--nz-fs-base);
+    }
+    :global(.js) .nz-nav__links a[aria-current="page"]::after {
+      inset: 10px auto 10px 0;
+      width: 3px;
+      height: auto;
+    }
+    /* Without JavaScript the links simply wrap below the brand. */
+    :global(html:not(.js)) .nz-nav__inner {
+      flex-wrap: wrap;
+      padding-block: var(--nz-space-2);
+    }
+    :global(html:not(.js)) .nz-nav__links {
+      order: 3;
+      width: 100%;
+    }
+  }
+  @media (max-width: 22.5rem) {
+    .nz-nav__word {
+      letter-spacing: 0.2em;
+    }
+  }
+</style>
+
+<script>
+  const button = document.querySelector<HTMLButtonElement>(".nz-nav__menu");
+  const links = document.getElementById("nz-nav-links");
+  if (button && links) {
+    const set = (open: boolean) => {
+      button.setAttribute("aria-expanded", String(open));
+      links.toggleAttribute("data-open", open);
+    };
+    button.addEventListener("click", () =>
+      set(button.getAttribute("aria-expanded") !== "true"),
+    );
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && links.hasAttribute("data-open")) {
+        set(false);
+        button.focus();
+      }
+    });
+    matchMedia("(min-width: 52.0625rem)").addEventListener("change", () =>
+      set(false),
+    );
+  }
+</script>

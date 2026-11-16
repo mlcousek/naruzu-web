@@ -1,0 +1,568 @@
+---
+/**
+ * About the app (issue #595): what NARUZU is, who it is for, its principles,
+ * how it works, a modest roadmap (no promises, no dates), tech at a glance and credits.
+ */
+import Base from "../layouts/Base.astro";
+import Hero from "../components/Hero.astro";
+import Section from "../components/Section.astro";
+import Button from "../components/Button.astro";
+import Reveal from "../components/Reveal.astro";
+import Shot from "../components/Shot.astro";
+import FlowDiagram from "../components/about/FlowDiagram.astro";
+import { SHOT_ALT } from "../lib/shots";
+import { BETA_VERSION } from "../config/site";
+
+const audiences = [
+  {
+    title: "Riders with a smart trainer",
+    text: "You want real roads and honest numbers on the trainer in your spare room, without a subscription to sort out first.",
+  },
+  {
+    title: "Riders who train with a plan",
+    text: "You ride structured sessions, want ERG to hold the watts and want a FIT file of every ride for the platform you already use.",
+  },
+  {
+    title: "Riders who care where their data goes",
+    text: "You want rides stored on your own computer and nothing shared until you decide to share it.",
+  },
+];
+
+const principles = [
+  {
+    icon: "smooth",
+    title: "Smooth, with no lag",
+    text: "Frame time is measured, not guessed. Quality presets, adaptive resolution and a plain map view keep the ride fluid on older graphics.",
+  },
+  {
+    icon: "friendly",
+    title: "Friendly and honest",
+    text: "Plain words, one Setup screen for every ride, and help buttons that explain FTP and ERG. When something is not verified, the app and the guide say so.",
+  },
+  {
+    icon: "privacy",
+    title: "Private by default",
+    text: "Rides, routes and workouts live on your device. Uploads start only when you press Send; the diagnostics file is never sent for you.",
+  },
+  {
+    icon: "offline",
+    title: "Offline-capable",
+    text: "Once installed, the virtual trainer, local routes, workouts, recording and FIT export need no network. Regional maps can be downloaded for offline Quick Ride.",
+  },
+  {
+    icon: "access",
+    title: "Accessible",
+    text: "Keyboard shortcuts for every ride control, visible focus, dark and light themes, reduced motion, and sound that starts only when you turn it on.",
+  },
+  {
+    icon: "yours",
+    title: "Your files, your choice",
+    text: "Export FIT files, a full backup, your workouts as ZWO and your routes as GPX. Moving to another computer is a backup and a restore.",
+  },
+];
+
+/** Work that exists today as an open change in the project roadmap. */
+const roadmap = [
+  {
+    area: "Hardware",
+    title: "Checking real trainers",
+    text: "Riding the beta on real FTMS trainers and heart-rate straps, so the guide can move items from 'not yet verified' to checked.",
+  },
+  {
+    area: "Riding",
+    title: "Virtual shifting",
+    text: "Gear changes on the trainer without touching the bike. In the beta it is marked Experimental until it has been ridden on hardware.",
+  },
+  {
+    area: "Performance",
+    title: "Smoother world streaming",
+    text: "Moving more of the world's building work off the main thread, and compressing textures, so rides stay smooth on more machines.",
+  },
+  {
+    area: "Platforms",
+    title: "Linux on a real desktop",
+    text: "The Linux packages are built. Installing them and riding with Bluetooth on a real distribution is still to do.",
+  },
+  {
+    area: "Home",
+    title: "A next step on Home",
+    text: "A small, rule-based suggestion of what to ride next, from your own history, instead of the same featured route for everyone.",
+  },
+];
+
+const tech = [
+  ["Interface", "React and TypeScript, built with Vite"],
+  ["3D world", "three.js, WebGPU with a WebGL 2 fallback"],
+  [
+    "Desktop",
+    "Electron for Windows (installer and portable ZIP) and Linux packages",
+  ],
+  [
+    "Trainers",
+    "Web Bluetooth with the standard FTMS, power, cadence and heart-rate services",
+  ],
+  ["Storage", "IndexedDB on your device; full backups as one file"],
+  ["Rides", "FIT files written with the Garmin FIT SDK"],
+  [
+    "Maps and routes",
+    "OpenStreetMap data, a bundled BRouter router and MapLibre for the map view",
+  ],
+];
+
+const credits = [
+  {
+    title: "OpenStreetMap",
+    text: "Road geometry for the built-in climbs and scenic rides, scenery features around the climbs, regional extracts and live map queries. © OpenStreetMap contributors, available under the Open Database Licence (ODbL) 1.0.",
+    href: "https://www.openstreetmap.org/copyright",
+    link: "openstreetmap.org/copyright",
+  },
+  {
+    title: "Map tiles",
+    text: "OpenFreeMap and OpenMapTiles styles for the map view, with © OpenStreetMap contributors. Each provider's terms apply to its tiles.",
+    href: "https://openfreemap.org",
+    link: "openfreemap.org",
+  },
+  {
+    title: "Routing",
+    text: "BRouter, bundled as the built-in router, with its licence included in the app's notices.",
+    href: "https://brouter.de",
+    link: "brouter.de",
+  },
+  {
+    title: "Elevation",
+    text: "AWS Terrain Tiles (Mapzen Terrarium) with SRTM, GMTED2010, ETOPO1 and EU-DEM sources. Some Czech terrain and land cover: ČÚZK DMR 5G and Ortofoto ČR, CC BY 4.0.",
+    href: "https://registry.opendata.aws/terrain-tiles/",
+    link: "registry.opendata.aws/terrain-tiles",
+  },
+  {
+    title: "Borders",
+    text: "Natural Earth, public domain.",
+    href: "https://www.naturalearthdata.com/about/terms-of-use/",
+    link: "naturalearthdata.com",
+  },
+  {
+    title: "Rider body",
+    text: "The rider's body, morphs and hair are MakeHuman assets, CC0 1.0. Kit, bikes, wheels and the rest of the models were made for NARUZU.",
+    href: "https://creativecommons.org/publicdomain/zero/1.0/",
+    link: "CC0 1.0",
+  },
+];
+---
+
+<Base
+  title="About the app"
+  description="What NARUZU is and who it is for: an indoor cycling app that pairs with your smart trainer, builds a world around real roads and keeps your rides on your own computer."
+>
+  <Hero
+    eyebrow="About the app"
+    title="One calm place for every indoor ride"
+    lead="NARUZU connects to your smart trainer, builds a world around the road you choose and keeps every ride on your own computer."
+    image="coastal-road"
+    size="compact"
+  >
+    <Button href="/docs/user/">Get started</Button>
+    <Button href="/game/" variant="secondary">
+      See the riding world
+    </Button>
+  </Hero>
+
+  <Section
+    eyebrow="What it is"
+    title="An indoor cycling app, built with care"
+    width="wide"
+  >
+    <div class="intro">
+      <Reveal class="intro__text nz-prose">
+        <p class="intro__lead">
+          You ride a road on your trainer, or without one using a simulated
+          rider, and NARUZU draws scenery around that road, records the ride and
+          lets you export it as a FIT file.
+        </p>
+        <p>
+          It runs as a desktop app on Windows, with Linux packages and a browser
+          version for Chrome and Edge. It is in a closed public beta (
+          {BETA_VERSION}): shared personally with a few testers, free, unsigned
+          and still being checked on real hardware. Career mode, real race
+          events, the coin Shop and riding companions are switched off in this
+          beta.
+        </p>
+      </Reveal>
+      <Reveal class="intro__shot" effect="scale" delay={120}>
+        <Shot
+          name="home"
+          alt={SHOT_ALT.home}
+          sizes="(min-width: 64rem) 46vw, 94vw"
+        />
+      </Reveal>
+    </div>
+  </Section>
+
+  <Section
+    eyebrow="Who it is for"
+    title="Made for riders like these"
+    width="wide"
+    tone="raised"
+  >
+    <ul class="cards" role="list">
+      {audiences.map((item, i) => (
+        <Reveal as="li" delay={i * 90} class="cards__item">
+          <h3>{item.title}</h3>
+          <p>{item.text}</p>
+        </Reveal>
+      ))}
+    </ul>
+  </Section>
+
+  <Section
+    eyebrow="Principles"
+    title="What we will not trade away"
+    intro="Six rules the app is built and tested against."
+    width="wide"
+  >
+    <ul class="principles" role="list">
+      {principles.map((item, i) => (
+        <Reveal as="li" delay={(i % 3) * 90} class="principles__item">
+          <span class="principles__icon" aria-hidden="true">
+            <svg viewBox="0 0 32 32">
+              {item.icon === "smooth" && (
+                <path d="M3 22 C 9 22 9 10 16 10 S 23 22 29 22" />
+              )}
+              {item.icon === "friendly" && (
+                <>
+                  <circle cx="16" cy="16" r="12" />
+                  <path d="M11 19 q5 5 10 0 M12 13 h.01 M20 13 h.01" />
+                </>
+              )}
+              {item.icon === "privacy" && (
+                <>
+                  <rect x="8" y="14" width="16" height="13" rx="3" />
+                  <path d="M11 14 v-4 a5 5 0 0 1 10 0 v4" />
+                </>
+              )}
+              {item.icon === "offline" && (
+                <>
+                  <path d="M5 13 a16 16 0 0 1 22 0 M9 17 a10 10 0 0 1 14 0 M13 21 a4 4 0 0 1 6 0" />
+                  <path d="M4 4 L28 28" />
+                </>
+              )}
+              {item.icon === "access" && (
+                <>
+                  <circle cx="16" cy="6" r="2.5" />
+                  <path d="M7 11 H25 M16 11 V19 M16 19 L11 28 M16 19 L21 28" />
+                </>
+              )}
+              {item.icon === "yours" && (
+                <>
+                  <path d="M8 4 H19 L25 10 V28 H8 Z M19 4 V10 H25" />
+                  <path d="M16 14 V23 M12 19 L16 23 L20 19" />
+                </>
+              )}
+            </svg>
+          </span>
+          <h3>{item.title}</h3>
+          <p>{item.text}</p>
+        </Reveal>
+      ))}
+    </ul>
+  </Section>
+
+  <Section
+    eyebrow="How it works"
+    title="Trainer, app, world"
+    intro="Three parts and two hand-offs. The trainer talks to the app over Bluetooth; the app turns your power into speed on the road and the road's gradient back into resistance."
+    width="wide"
+    tone="raised"
+  >
+    <FlowDiagram
+      nodes={[
+        {
+          icon: "trainer",
+          label: "Your bike",
+          title: "Trainer and sensors",
+          text: "A smart trainer, power meter, cadence sensor or heart-rate strap, or the virtual trainer if you have none.",
+        },
+        {
+          icon: "app",
+          label: "On your computer",
+          title: "NARUZU",
+          text: "Reads your power, works out your speed from your weight, bike and the gradient, records every second and shows it in the HUD.",
+        },
+        {
+          icon: "world",
+          label: "On screen",
+          title: "The riding world",
+          text: "Terrain, trees, towns and weather built around the road as you move, and a map view if you prefer.",
+        },
+      ]}
+      links={["Power, cadence, heart rate in", "Speed out, gradient back"]}
+    />
+  </Section>
+
+  <Section
+    eyebrow="Roadmap"
+    title="What is being worked on"
+    intro="Work that exists today as open changes in the project. No dates and no promises: plans change as testing shows what matters."
+    width="wide"
+  >
+    <ol class="roadmap" role="list">
+      {roadmap.map((item, i) => (
+        <Reveal as="li" delay={(i % 3) * 80} class="roadmap__item">
+          <span class="roadmap__area">{item.area}</span>
+          <h3>{item.title}</h3>
+          <p>{item.text}</p>
+        </Reveal>
+      ))}
+    </ol>
+  </Section>
+
+  <Section
+    eyebrow="Under the hood"
+    title="Tech at a glance"
+    tone="raised"
+    width="wide"
+  >
+    <div class="tech">
+      <dl class="tech__list">
+        {tech.map(([term, text]) => (
+          <div>
+            <dt>{term}</dt>
+            <dd>{text}</dd>
+          </div>
+        ))}
+      </dl>
+      <Reveal class="tech__aside">
+        <h3>Built in the open, for the team</h3>
+        <p>
+          A pnpm monorepo with typecheck, lint, unit and end-to-end tests and a
+          performance budget for the world. The developer docs explain the
+          architecture, packages and how to build it.
+        </p>
+        <Button href="/docs/dev/" variant="secondary">
+          Developer docs
+        </Button>
+      </Reveal>
+    </div>
+  </Section>
+
+  <Section
+    id="credits"
+    eyebrow="Credits"
+    title="Built on open data"
+    intro="NARUZU stands on the work of many open projects. The full notices ship with the app; these are the data and assets you see on screen."
+    width="wide"
+  >
+    <ul class="credits" role="list">
+      {credits.map((item) => (
+        <li class="credits__item">
+          <h3>{item.title}</h3>
+          <p>{item.text}</p>
+          <a href={item.href} rel="noopener noreferrer">
+            {item.link}
+          </a>
+        </li>
+      ))}
+    </ul>
+    <p class="credits__fine">
+      Software libraries are listed with their exact licence texts in the app's
+      THIRD-PARTY-NOTICES file. Scenery artwork on this site and in the app
+      menus is generated, illustrative artwork made for NARUZU, not a photo of a
+      real place. Strava, Garmin, Spotify and other product names are trademarks
+      of their owners; NARUZU is not affiliated with or endorsed by them.
+    </p>
+  </Section>
+</Base>
+
+<style>
+  .intro {
+    display: grid;
+    gap: var(--nz-space-6);
+    align-items: center;
+  }
+  @media (min-width: 64rem) {
+    .intro {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    }
+  }
+  .intro__lead {
+    font-family: var(--nz-font-display);
+    font-size: var(--nz-fs-h3);
+    line-height: 1.4;
+  }
+  .intro :global(.intro__text) p:not(.intro__lead) {
+    color: var(--nz-muted);
+  }
+  .intro :global(.intro__shot) {
+    overflow: hidden;
+    border: 1px solid var(--nz-line);
+    border-radius: var(--nz-radius-lg);
+    box-shadow: 0 30px 60px -30px #000c;
+  }
+  .intro :global(.intro__shot img) {
+    width: 100%;
+    height: auto;
+  }
+
+  .cards,
+  .principles,
+  .roadmap,
+  .credits {
+    display: grid;
+    gap: var(--nz-space-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  @media (min-width: 48rem) {
+    .cards,
+    .credits {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .principles,
+    .roadmap {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 64rem) {
+    .cards,
+    .credits,
+    .principles {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    /* Five items: three on the first row, two wider ones on the second. */
+    .roadmap {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+    .roadmap :global(.roadmap__item) {
+      grid-column: span 2;
+    }
+    .roadmap :global(.roadmap__item:nth-child(n + 4)) {
+      grid-column: span 3;
+    }
+  }
+  .cards :global(.cards__item),
+  .principles :global(.principles__item),
+  .roadmap :global(.roadmap__item),
+  .credits__item {
+    padding: var(--nz-space-5);
+    border: 1px solid var(--nz-line);
+    border-radius: var(--nz-radius);
+    background: var(--nz-panel);
+  }
+  .cards h3,
+  .principles h3,
+  .roadmap h3,
+  .credits h3 {
+    font-size: var(--nz-fs-lead);
+  }
+  .cards p,
+  .principles p,
+  .roadmap p,
+  .credits p {
+    margin-top: var(--nz-space-2);
+    font-size: var(--nz-fs-sm);
+    color: var(--nz-muted);
+  }
+  .cards :global(.cards__item) {
+    border-top: 3px solid var(--nz-accent);
+  }
+  .principles__icon {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin-bottom: var(--nz-space-3);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--nz-mint) 16%, transparent);
+  }
+  .principles__icon svg {
+    width: 1.6rem;
+    height: 1.6rem;
+    fill: none;
+    stroke: var(--nz-mint);
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .roadmap {
+    counter-reset: road;
+  }
+  .roadmap :global(.roadmap__item) {
+    position: relative;
+    border-style: dashed;
+    background: transparent;
+  }
+  .roadmap__area {
+    display: inline-block;
+    margin-bottom: var(--nz-space-2);
+    padding: 0.1rem 0.6rem;
+    border-radius: var(--nz-radius-pill);
+    background: color-mix(in srgb, var(--nz-accent) 14%, transparent);
+    color: var(--nz-accent);
+    font-size: var(--nz-fs-min);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .tech {
+    display: grid;
+    gap: var(--nz-space-6);
+  }
+  @media (min-width: 64rem) {
+    .tech {
+      grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+      align-items: start;
+    }
+  }
+  .tech__list {
+    display: grid;
+    margin: 0;
+    border-top: 1px solid var(--nz-line);
+  }
+  .tech__list > div {
+    display: grid;
+    gap: var(--nz-space-1) var(--nz-space-5);
+    padding-block: var(--nz-space-3);
+    border-bottom: 1px solid var(--nz-line);
+  }
+  @media (min-width: 40rem) {
+    .tech__list > div {
+      grid-template-columns: 10rem 1fr;
+    }
+  }
+  .tech__list dt {
+    font-weight: 700;
+    color: var(--nz-accent);
+  }
+  .tech__list dd {
+    margin: 0;
+  }
+  .tech :global(.tech__aside) {
+    padding: var(--nz-space-5);
+    border: 1px solid var(--nz-line);
+    border-radius: var(--nz-radius-lg);
+    background: var(--nz-panel);
+  }
+  .tech :global(.tech__aside) h3 {
+    font-size: var(--nz-fs-lead);
+  }
+  .tech :global(.tech__aside) p {
+    margin-block: var(--nz-space-3) var(--nz-space-4);
+    color: var(--nz-muted);
+  }
+
+  .credits__item a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--nz-target);
+    font-size: var(--nz-fs-sm);
+    font-weight: 700;
+    overflow-wrap: anywhere;
+  }
+  .credits__fine {
+    max-width: var(--nz-measure);
+    margin-top: var(--nz-space-6);
+    font-size: var(--nz-fs-sm);
+    color: var(--nz-muted);
+  }
+</style>

@@ -1,0 +1,183 @@
+---
+/**
+ * Page hero: scenery art under a teal scrim (like the app's Home hero), an
+ * eyebrow, a big title with the app's amber full stop, a lead line, actions
+ * in the default slot and the drawn elevation profile along the bottom.
+ *
+ *   <Hero eyebrow="Indoor cycling" title="Ride real roads" lead="..." image="lake-road">
+ *     <Button href="/docs/user/">Get started</Button>
+ *   </Hero>
+ */
+import Scenery, { type SceneryName } from "./Scenery.astro";
+import ElevationLine from "./ElevationLine.astro";
+
+interface Props {
+  eyebrow?: string;
+  title: string;
+  lead?: string;
+  image?: SceneryName;
+  imagePosition?: string;
+  /** full: home page; compact: inner pages. */
+  size?: "full" | "compact";
+  /** Show the drawn elevation profile (default true). */
+  profile?: boolean;
+  /** Use h1 (default) or h2 when the page already has an h1. */
+  as?: "h1" | "h2";
+}
+
+const {
+  eyebrow,
+  title,
+  lead,
+  image = "lake-road",
+  imagePosition = "center 60%",
+  size = "full",
+  profile = true,
+  as: Heading = "h1",
+} = Astro.props;
+---
+
+<section class:list={["nz-hero", `nz-hero--${size}`]}>
+  <div class="nz-hero__art">
+    <Scenery name={image} priority position={imagePosition} />
+  </div>
+  <div class="nz-hero__inner nz-container nz-container--wide">
+    <div class="nz-hero__copy">
+      {eyebrow && <p class="nz-eyebrow nz-hero__eyebrow">{eyebrow}</p>}
+      <Heading class="nz-hero__title nz-dot">{title}</Heading>
+      {lead && <p class="nz-hero__lead">{lead}</p>}
+      {Astro.slots.has("default") && (
+        <div class="nz-hero__actions">
+          <slot />
+        </div>
+      )}
+    </div>
+  </div>
+  {profile && (
+    <div class="nz-hero__profile">
+      <ElevationLine />
+    </div>
+  )}
+</section>
+
+<style>
+  .nz-hero {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    align-items: end;
+    overflow: hidden;
+    min-height: min(88svh, 860px);
+    padding-block: calc(var(--nz-space-8) + 2rem) var(--nz-space-8);
+    color: #f4f7f4;
+  }
+  .nz-hero--compact {
+    min-height: clamp(360px, 52svh, 560px);
+    padding-block: var(--nz-space-8) var(--nz-space-7);
+  }
+  .nz-hero__art,
+  .nz-hero__art :global(picture),
+  .nz-hero__art :global(img) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -2;
+  }
+  .nz-hero__art :global(img) {
+    object-fit: cover;
+  }
+  /* Teal scrim from the app hero: strong on the text side and at the bottom. */
+  .nz-hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      linear-gradient(180deg, #031d2599 0%, #031d2500 30%),
+      linear-gradient(90deg, #03232bf2 0%, #03232bd6 34%, #03232b40 78%),
+      linear-gradient(0deg, var(--nz-bg) 0%, #031d2500 34%);
+  }
+  :global([data-theme="light"]) .nz-hero::before {
+    background:
+      linear-gradient(180deg, #031d2599 0%, #031d2500 30%),
+      linear-gradient(90deg, #03232bf2 0%, #03232bd6 34%, #03232b40 78%),
+      linear-gradient(0deg, var(--nz-bg) 0%, #e6efee00 30%);
+  }
+  .nz-hero__copy {
+    max-width: 44rem;
+  }
+  .nz-hero__eyebrow {
+    color: #ffc082;
+  }
+  .nz-hero__title {
+    margin-top: var(--nz-space-4);
+    font-family: var(--nz-font-display);
+    font-size: var(--nz-fs-hero);
+    font-weight: 600;
+    line-height: var(--nz-lh-tight);
+    letter-spacing: -0.03em;
+    color: #f4f7f4;
+  }
+  .nz-hero--compact .nz-hero__title {
+    font-size: var(--nz-fs-h1);
+  }
+  .nz-hero__title.nz-dot::after {
+    color: #ffaa5c;
+  }
+  .nz-hero__lead {
+    margin-top: var(--nz-space-5);
+    max-width: 36rem;
+    font-size: var(--nz-fs-lead);
+    line-height: 1.5;
+    color: #dbe7e8;
+  }
+  .nz-hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--nz-space-3);
+    margin-top: var(--nz-space-6);
+  }
+  /* Secondary buttons inside the hero sit on dark art in both themes. */
+  .nz-hero__actions :global(.nz-button--secondary) {
+    background: #0d1f27b3;
+    border-color: #ffffff40;
+    color: #f4f7f4;
+  }
+  .nz-hero__profile {
+    position: absolute;
+    inset: auto 0 0;
+    z-index: -1;
+    opacity: 0.9;
+    pointer-events: none;
+  }
+  .nz-hero__profile :global(.nz-elevation__line),
+  .nz-hero__profile :global(.nz-elevation__peak) {
+    stroke: #ffaa5c;
+  }
+  :global([data-theme="light"]) .nz-hero__profile :global(.nz-elevation__line),
+  :global([data-theme="light"]) .nz-hero__profile :global(.nz-elevation__peak) {
+    stroke: #9c4205;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    :global(.js) .nz-hero__copy > * {
+      animation: nz-hero-in 900ms var(--nz-ease-out) both;
+    }
+    :global(.js) .nz-hero__copy > :nth-child(2) {
+      animation-delay: 80ms;
+    }
+    :global(.js) .nz-hero__copy > :nth-child(3) {
+      animation-delay: 180ms;
+    }
+    :global(.js) .nz-hero__copy > :nth-child(4) {
+      animation-delay: 280ms;
+    }
+  }
+  @keyframes nz-hero-in {
+    from {
+      opacity: 0;
+      transform: translateY(18px);
+    }
+  }
+</style>

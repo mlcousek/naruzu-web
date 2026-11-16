@@ -1,0 +1,502 @@
+---
+/**
+ * Scroll-driven story: a gradient-coloured elevation profile (the app's grade
+ * colours) draws itself as you scroll while four steps of a ride light up in
+ * turn. On wide screens with motion allowed the section pins; elsewhere it
+ * draws as it passes through the viewport. Without JavaScript or under
+ * reduced motion the profile is fully drawn and every step is shown.
+ */
+interface Step {
+  title: string;
+  text: string;
+}
+interface Props {
+  steps: Step[];
+}
+const { steps } = Astro.props;
+
+// An illustrative 14 km climb (not a real road): distance (km) -> height (m).
+const KEYS: [number, number][] = [
+  [0, 420],
+  [1.4, 432],
+  [2.6, 505],
+  [3.6, 498],
+  [4.4, 540],
+  [6, 690],
+  [7.2, 760],
+  [8, 742],
+  [9.6, 905],
+  [11.2, 1050],
+  [12, 1046],
+  [13.1, 1128],
+  [14, 1112],
+];
+const heightAt = (km: number) => {
+  const i = KEYS.findIndex(([d]) => d > km);
+  if (i < 0) return KEYS[KEYS.length - 1]![1];
+  if (i === 0) return KEYS[0]![1];
+  const [d0, h0] = KEYS[i - 1]!;
+  const [d1, h1] = KEYS[i]!;
+  return h0 + ((h1 - h0) * (km - d0)) / (d1 - d0);
+};
+const N = 140;
+const LENGTH = 14;
+const samples = Array.from({ length: N + 1 }, (_, i) => {
+  const km = (i / N) * LENGTH;
+  return { km, h: heightAt(km) };
+});
+const W = 1000;
+const H = 320;
+const PAD_TOP = 36;
+const PAD_BOTTOM = 34;
+const minH = 380;
+const maxH = 1160;
+const x = (km: number) => (km / LENGTH) * W;
+const y = (h: number) =>
+  PAD_TOP + (1 - (h - minH) / (maxH - minH)) * (H - PAD_TOP - PAD_BOTTOM);
+
+/** The app's gradient colours (apps/web/src/hud.ts gradeColor). */
+const gradeColor = (g: number) =>
+  g < -1.5
+    ? "#4fc3ff"
+    : g < 2
+      ? "#35d07f"
+      : g < 5
+        ? "#c6e04a"
+        : g < 8
+          ? "#ffd23f"
+          : g < 11
+            ? "#ff8a3d"
+            : "#ff6675";
+
+// One coloured band per run of equal gradient colour, like the app's route profile.
+interface Band {
+  color: string;
+  pts: [number, number][];
+}
+const bands: Band[] = [];
+for (let i = 1; i < samples.length; i++) {
+  const p = samples[i - 1]!;
+  const s = samples[i]!;
+  const color = gradeColor(((s.h - p.h) / ((s.km - p.km) * 1000)) * 100);
+  const last = bands[bands.length - 1];
+  if (last && last.color === color) last.pts.push([s.km, s.h]);
+  else
+    bands.push({
+      color,
+      pts: [
+        [p.km, p.h],
+        [s.km, s.h],
+      ],
+    });
+}
+const segments = bands.map(({ color, pts }) => {
+  const start = pts[0]![0];
+  const end = pts[pts.length - 1]![0];
+  const top = pts
+    .map(([k, h]) => `L${x(k).toFixed(1)} ${y(h).toFixed(1)}`)
+    .join(" ");
+  return {
+    color,
+    d: `M${x(start).toFixed(1)} ${H} ${top} L${x(end).toFixed(1)} ${H} Z`,
+  };
+});
+const line = samples
+  .map((s, i) => `${i ? "L" : "M"}${x(s.km).toFixed(1)} ${y(s.h).toFixed(1)}`)
+  .join(" ");
+const data = JSON.stringify(
+  samples.map((s) => [Number(s.km.toFixed(2)), Math.round(s.h)]),
+);
+const climbed = Math.round(
+  samples
+    .slice(1)
+    .reduce((sum, s, i) => sum + Math.max(0, s.h - samples[i]!.h), 0),
+);
+const last = samples[samples.length - 1]!;
+const legend = [
+  ["#4fc3ff", "Descent"],
+  ["#35d07f", "Flat"],
+  ["#c6e04a", "Gentle"],
+  ["#ffd23f", "Climb"],
+  ["#ff8a3d", "Steep"],
+  ["#ff6675", "Very steep"],
+];
+---
+
+<section class="story" aria-labelledby="story-title" data-climb-story>
+  <div class="story__sticky">
+    <div class="nz-container nz-container--wide story__inner">
+      <header class="story__head">
+        <p class="nz-eyebrow">How a ride works</p>
+        <h2 id="story-title" class="story__title nz-dot">
+          Every metre of the climb, felt in your legs
+        </h2>
+      </header>
+      <div class="story__grid">
+        <ol class="story__steps" role="list">
+          {steps.map((step, i) => (
+            <li class="story__step" data-step={i}>
+              <span class="story__num" aria-hidden="true">
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <div>
+                <h3 class="story__step-title">{step.title}</h3>
+                <p class="story__step-text">{step.text}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+        <figure class="story__figure nz-glass">
+          <div class="story__readout" aria-hidden="true">
+            <div>
+              <span class="story__label">Distance</span>
+              <span class="story__value" data-km>
+                {last.km.toFixed(1)}
+                <small> km</small>
+              </span>
+            </div>
+            <div>
+              <span class="story__label">Height</span>
+              <span class="story__value" data-h>
+                {Math.round(last.h)}
+                <small> m</small>
+              </span>
+            </div>
+            <div>
+              <span class="story__label">Grade</span>
+              <span class="story__value" data-g>
+                -1.8<small> %</small>
+              </span>
+            </div>
+          </div>
+          <div class="story__plot">
+            <svg
+              viewBox={`0 0 ${W} ${H}`}
+              preserveAspectRatio="none"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <defs>
+                <clipPath id="story-clip">
+                  <rect x="0" y="0" width={W} height={H} data-clip></rect>
+                </clipPath>
+              </defs>
+              {[0.25, 0.5, 0.75].map((f) => (
+                <line
+                  class="story__grid-line"
+                  x1="0"
+                  x2={W}
+                  y1={PAD_TOP + f * (H - PAD_TOP - PAD_BOTTOM)}
+                  y2={PAD_TOP + f * (H - PAD_TOP - PAD_BOTTOM)}
+                />
+              ))}
+              <g clip-path="url(#story-clip)">
+                {segments.map((s) => (
+                  <path
+                    d={s.d}
+                    fill={s.color}
+                    stroke={s.color}
+                    class="story__seg"
+                  />
+                ))}
+                <path
+                  d={line}
+                  class="story__line"
+                  vector-effect="non-scaling-stroke"
+                ></path>
+              </g>
+            </svg>
+            <div class="story__marker" data-marker style="--x: 1">
+              <span class="story__track">
+                <span class="story__dot"></span>
+              </span>
+            </div>
+          </div>
+          <figcaption class="story__caption">
+            <ul class="story__legend" role="list">
+              {legend.map(([color, label]) => (
+                <li>
+                  <span class="story__swatch" style={`background:${color}`} />
+                  {label}
+                </li>
+              ))}
+            </ul>
+            <p>
+              An illustrative {LENGTH} km climb with {climbed} m of climbing,
+              coloured by gradient the way the app colours its route profiles.
+            </p>
+          </figcaption>
+        </figure>
+      </div>
+    </div>
+  </div>
+  <script type="application/json" data-profile set:html={data} />
+</section>
+
+<style>
+  .story {
+    position: relative;
+    padding-block: var(--nz-space-8);
+    background:
+      radial-gradient(
+        60rem 30rem at 85% 10%,
+        color-mix(in srgb, var(--nz-accent) 10%, transparent),
+        transparent 70%
+      ),
+      var(--nz-bg);
+  }
+  .story__head {
+    max-width: 48rem;
+  }
+  .story__title {
+    margin-top: var(--nz-space-3);
+    font-size: var(--nz-fs-h2);
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+  }
+  .story__grid {
+    display: grid;
+    gap: var(--nz-space-6);
+    margin-top: var(--nz-space-6);
+  }
+  @media (min-width: 64rem) {
+    .story__grid {
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.6fr);
+      align-items: center;
+    }
+  }
+  .story__steps {
+    display: grid;
+    gap: var(--nz-space-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: step;
+  }
+  .story__step {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--nz-space-4);
+    padding: var(--nz-space-4) var(--nz-space-5);
+    border: 1px solid var(--nz-line-soft);
+    border-radius: var(--nz-radius);
+    background: color-mix(in srgb, var(--nz-panel) 70%, transparent);
+    transition:
+      border-color var(--nz-dur) ease,
+      background-color var(--nz-dur) ease,
+      transform var(--nz-dur) var(--nz-ease-out);
+  }
+  .story__step[data-active] {
+    border-color: var(--nz-accent);
+    background: var(--nz-panel);
+  }
+  .story__num {
+    font-family: var(--nz-font-data);
+    font-size: var(--nz-fs-sm);
+    font-weight: 700;
+    color: var(--nz-accent);
+    padding-top: 0.2rem;
+  }
+  .story__step-title {
+    font-size: var(--nz-fs-base);
+    font-weight: 750;
+  }
+  .story__step-text {
+    margin-top: var(--nz-space-1);
+    font-size: var(--nz-fs-sm);
+    color: var(--nz-muted);
+  }
+  .story__figure {
+    margin: 0;
+    padding: var(--nz-space-5);
+    background: var(--nz-panel);
+    border-color: var(--nz-line);
+  }
+  .story__readout {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--nz-space-2) var(--nz-space-6);
+    margin-bottom: var(--nz-space-4);
+  }
+  .story__readout > div {
+    display: grid;
+  }
+  .story__label {
+    font-size: var(--nz-fs-min);
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--nz-muted);
+  }
+  .story__value {
+    font-family: var(--nz-font-data);
+    font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2.25rem);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+    display: inline-block;
+    min-width: 7.5ch;
+  }
+  .story__value small {
+    font-size: 0.5em;
+    color: var(--nz-muted);
+  }
+  .story__plot {
+    position: relative;
+    aspect-ratio: 1000 / 320;
+  }
+  .story__plot svg {
+    width: 100%;
+    height: 100%;
+  }
+  .story__grid-line {
+    stroke: var(--nz-line-soft);
+    stroke-dasharray: 4 6;
+  }
+  .story__seg {
+    stroke-width: 1.2;
+  }
+  .story__line {
+    fill: none;
+    stroke: var(--nz-text);
+    stroke-width: 2;
+    stroke-linejoin: round;
+  }
+  /* Moved with transforms only (no layout shift): --x is 0..1 across the plot. */
+  .story__marker {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    transform: translateX(calc(var(--x, 1) * 100% - 1px));
+  }
+  .story__marker::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    border-left: 2px dashed var(--nz-accent);
+  }
+  /* Full plot height, so translateY(%) moves the dot by a share of the plot. */
+  .story__track {
+    position: absolute;
+    inset: 0;
+    transform: translateY(calc(var(--dot-y, 8) * 1%));
+  }
+  .story__dot {
+    position: absolute;
+    left: -8px;
+    top: 0;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--nz-accent);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--nz-accent) 30%, transparent);
+    transform: translateY(-50%);
+  }
+  .story__caption {
+    margin-top: var(--nz-space-4);
+    font-size: var(--nz-fs-sm);
+    color: var(--nz-muted);
+  }
+  .story__legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--nz-space-2) var(--nz-space-4);
+    margin: 0 0 var(--nz-space-2);
+    padding: 0;
+    list-style: none;
+  }
+  .story__legend li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .story__swatch {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 3px;
+  }
+
+  /* Pinned storytelling on large screens with motion allowed (CSS only, so no layout shift). */
+  @media (prefers-reduced-motion: no-preference) and (min-width: 64rem) and (min-height: 40rem) {
+    :global(.js) .story {
+      height: 260vh;
+      padding-block: 0;
+    }
+    :global(.js) .story__sticky {
+      position: sticky;
+      top: var(--nz-nav-h);
+      display: grid;
+      align-items: center;
+      min-height: calc(100vh - var(--nz-nav-h));
+      padding-block: var(--nz-space-6);
+    }
+  }
+</style>
+
+<script>
+  import { onScrollProgress, reducedMotion } from "../../lib/motion";
+
+  const root = document.querySelector<HTMLElement>("[data-climb-story]");
+  if (root && !reducedMotion()) {
+    const profile: [number, number][] = JSON.parse(
+      root.querySelector("[data-profile]")?.textContent || "[]",
+    );
+    const clip = root.querySelector<SVGRectElement>("[data-clip]");
+    const marker = root.querySelector<HTMLElement>("[data-marker]");
+    const km = root.querySelector<HTMLElement>("[data-km]");
+    const h = root.querySelector<HTMLElement>("[data-h]");
+    const g = root.querySelector<HTMLElement>("[data-g]");
+    const steps = [...root.querySelectorAll<HTMLElement>("[data-step]")];
+    const total = profile[profile.length - 1]?.[0] ?? 1;
+    const MIN = 380;
+    const MAX = 1160;
+    const pinned = () =>
+      getComputedStyle(root.querySelector(".story__sticky")!).position ===
+      "sticky";
+    let lastStep = -1;
+
+    const figure = root.querySelector<HTMLElement>(".story__figure")!;
+    const progress = () => {
+      const vh = window.innerHeight || 1;
+      if (pinned()) {
+        const rect = root.getBoundingClientRect();
+        return -rect.top / Math.max(1, rect.height - vh) / 0.92;
+      }
+      // Not pinned: draw while the figure travels from the bottom third to the top third.
+      const rect = figure.getBoundingClientRect();
+      const centre = rect.top + rect.height / 2;
+      return (vh * 0.85 - centre) / (vh * 0.55);
+    };
+    const render = () => {
+      const p = Math.min(1, Math.max(0, progress()));
+      const i = Math.min(
+        profile.length - 1,
+        Math.round(p * (profile.length - 1)),
+      );
+      const [d, height] = profile[i]!;
+      const [pd, ph] = profile[Math.max(0, i - 2)]!;
+      const grade = d > pd ? ((height - ph) / ((d - pd) * 1000)) * 100 : 0;
+      clip?.setAttribute("width", String((d / total) * 1000));
+      if (marker) {
+        marker.style.setProperty("--x", (d / total).toFixed(4));
+        const top = 36 + (1 - (height - MIN) / (MAX - MIN)) * (320 - 70);
+        marker.style.setProperty("--dot-y", ((top / 320) * 100).toFixed(2));
+      }
+      if (km) km.firstChild!.textContent = d.toFixed(1);
+      if (h) h.firstChild!.textContent = String(height);
+      if (g) g.firstChild!.textContent = grade.toFixed(1);
+      const step = Math.min(
+        steps.length - 1,
+        Math.floor(p * steps.length * 0.999),
+      );
+      if (step !== lastStep) {
+        steps.forEach((el, n) => el.toggleAttribute("data-active", n === step));
+        lastStep = step;
+      }
+    };
+    render();
+    onScrollProgress(root, render, "through");
+  }
+</script>

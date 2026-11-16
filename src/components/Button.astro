@@ -1,0 +1,95 @@
+---
+/**
+ * A link styled as a button (or a real <button> when `href` is omitted).
+ * Variants: primary (amber, one per view), secondary (outlined glass), quiet (text).
+ * Internal hrefs are site-relative ("/docs/user/") and get the base path.
+ */
+import { url } from "../lib/url";
+
+interface Props {
+  href?: string;
+  variant?: "primary" | "secondary" | "quiet";
+  type?: "button" | "submit";
+  class?: string;
+  [key: string]: unknown;
+}
+const {
+  href,
+  variant = "primary",
+  type = "button",
+  class: className,
+  ...rest
+} = Astro.props;
+const classes = ["nz-button", `nz-button--${variant}`, className];
+---
+
+{href ? (
+  <a href={url(href)} class:list={classes} {...rest}>
+    <slot />
+  </a>
+) : (
+  <button type={type} class:list={classes} {...rest}>
+    <slot />
+  </button>
+)}
+
+<style>
+  .nz-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    min-height: var(--nz-target);
+    padding: 0 1.25rem;
+    border: 1px solid transparent;
+    border-radius: var(--nz-radius-sm);
+    font-size: var(--nz-fs-sm);
+    font-weight: 700;
+    line-height: 1.2;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+      background-color var(--nz-dur-fast) ease,
+      border-color var(--nz-dur-fast) ease,
+      color var(--nz-dur-fast) ease,
+      transform var(--nz-dur-fast) var(--nz-ease-out);
+  }
+  .nz-button:focus-visible {
+    outline: var(--nz-focus-ring);
+    outline-offset: var(--nz-focus-offset);
+  }
+  .nz-button--primary {
+    background: var(--nz-accent);
+    border-color: var(--nz-accent);
+    color: var(--nz-on-accent);
+  }
+  .nz-button--primary:hover {
+    background: var(--nz-accent-strong);
+    border-color: var(--nz-accent-strong);
+    color: var(--nz-on-accent);
+  }
+  .nz-button--secondary {
+    background: var(--nz-glass);
+    border-color: var(--nz-line);
+    color: var(--nz-text);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  .nz-button--secondary:hover {
+    border-color: var(--nz-accent);
+    color: var(--nz-text);
+  }
+  .nz-button--quiet {
+    padding-inline: 0.5rem;
+    color: var(--nz-accent);
+  }
+  .nz-button--quiet:hover {
+    color: var(--nz-accent-strong);
+    text-decoration: underline;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .nz-button:active {
+      transform: translateY(1px);
+    }
+  }
+</style>

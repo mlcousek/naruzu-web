@@ -1,0 +1,108 @@
+---
+/**
+ * Dark/light switch, a 44 px button. Shared by the marketing nav and the docs
+ * header (Starlight's ThemeSelect is replaced by this). The label always says
+ * what pressing it does.
+ */
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+---
+
+<nz-theme-toggle class:list={["nz-theme-toggle", className]}>
+  <button type="button" aria-label="Switch to light theme">
+    <svg class="moon" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"></path>
+    </svg>
+    <svg class="sun" viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="4"></circle>
+      <path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"></path>
+    </svg>
+  </button>
+</nz-theme-toggle>
+
+<style>
+  .nz-theme-toggle {
+    display: inline-flex;
+  }
+  button {
+    display: inline-grid;
+    place-items: center;
+    width: var(--nz-target, 44px);
+    height: var(--nz-target, 44px);
+    padding: 0;
+    border: 1px solid var(--nz-line);
+    border-radius: var(--nz-radius-pill, 999px);
+    background: var(--nz-panel);
+    color: var(--nz-text);
+    cursor: pointer;
+    transition:
+      border-color var(--nz-dur-fast) ease,
+      background-color var(--nz-dur-fast) ease;
+  }
+  button:hover {
+    border-color: var(--nz-accent);
+  }
+  button:focus-visible {
+    outline: var(--nz-focus-ring);
+    outline-offset: var(--nz-focus-offset);
+  }
+  svg {
+    grid-area: 1 / 1;
+    width: 21px;
+    height: 21px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  /* Show the theme you would switch TO. */
+  :global([data-theme="light"]) .moon,
+  :global(:root:not([data-theme="light"])) .sun {
+    display: block;
+  }
+  :global([data-theme="light"]) .sun,
+  :global(:root:not([data-theme="light"])) .moon {
+    display: none;
+  }
+</style>
+
+<script>
+  const KEY = "starlight-theme";
+  type Theme = "dark" | "light";
+
+  const current = (): Theme =>
+    document.documentElement.dataset.theme === "light" ? "light" : "dark";
+
+  function sync() {
+    const next = current() === "light" ? "dark" : "light";
+    document
+      .querySelectorAll<HTMLButtonElement>("nz-theme-toggle button")
+      .forEach((button) =>
+        button.setAttribute("aria-label", `Switch to ${next} theme`),
+      );
+  }
+
+  function setTheme(theme: Theme) {
+    document.documentElement.dataset.theme = theme;
+    try {
+      localStorage.setItem(KEY, theme);
+    } catch {
+      /* Private mode: the choice lasts for this page only. */
+    }
+    sync();
+  }
+
+  class ThemeToggle extends HTMLElement {
+    connectedCallback() {
+      sync();
+      this.querySelector("button")?.addEventListener("click", () =>
+        setTheme(current() === "light" ? "dark" : "light"),
+      );
+    }
+  }
+  if (!customElements.get("nz-theme-toggle"))
+    customElements.define("nz-theme-toggle", ThemeToggle);
+</script>

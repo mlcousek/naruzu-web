@@ -1,0 +1,372 @@
+---
+/**
+ * An illustration of the app's Atmosphere settings (weather and world clock):
+ * radio buttons for the weather and a slider for the hour tint a scenery
+ * picture with CSS layers. Labelled as an illustration, not the 3D world.
+ * Without JavaScript the controls are disabled and the picture shows a clear
+ * evening; under reduced motion rain and snow are still textures.
+ */
+import Scenery from "../Scenery.astro";
+
+const WEATHER = [
+  ["clear", "Clear"],
+  ["rain", "Rain"],
+  ["fog", "Fog"],
+  ["snow", "Snow"],
+] as const;
+---
+
+<div class="atmo" data-atmo data-weather="clear" style="--hour: 19">
+  <div class="atmo__stage">
+    <Scenery
+      name="forest-road"
+      alt=""
+      sizes="(min-width: 64rem) 60vw, 94vw"
+      position="center 60%"
+    />
+    <div class="atmo__sky" aria-hidden="true"></div>
+    <div class="atmo__fx atmo__fx--rain" aria-hidden="true"></div>
+    <div class="atmo__fx atmo__fx--snow" aria-hidden="true"></div>
+    <div class="atmo__fx atmo__fx--fog" aria-hidden="true"></div>
+    <p class="atmo__badge">Illustration of the settings, not the 3D world</p>
+    <p class="atmo__clock" aria-hidden="true" data-clock>
+      19:00
+    </p>
+  </div>
+  <form
+    class="atmo__controls"
+    data-atmo-form
+    aria-label="Atmosphere illustration"
+  >
+    <fieldset class="atmo__weather" disabled data-enable>
+      <legend>Weather</legend>
+      <div class="atmo__chips">
+        {WEATHER.map(([value, label], i) => (
+          <label class="atmo__chip">
+            <input
+              type="radio"
+              name="weather"
+              value={value}
+              checked={i === 0}
+            />
+            <span>{label}</span>
+          </label>
+        ))}
+      </div>
+    </fieldset>
+    <div class="atmo__field">
+      <label for="atmo-hour">
+        Time of day{" "}
+        <output data-hour-out for="atmo-hour">
+          19:00
+        </output>
+      </label>
+      <input
+        id="atmo-hour"
+        type="range"
+        name="hour"
+        min="4"
+        max="23"
+        step="0.5"
+        value="19"
+        disabled
+        data-enable
+        aria-valuetext="19:00"
+      />
+    </div>
+    <p class="atmo__fine">
+      In the app: Settings, Display and sound, Atmosphere. Scenery, season,
+      weather, road surface and a world clock (a fixed hour, your own clock or a
+      speeded-up day). Weather is for looks only and never changes resistance or
+      speed.
+    </p>
+  </form>
+</div>
+
+<style>
+  .atmo {
+    display: grid;
+    gap: var(--nz-space-5);
+  }
+  @media (min-width: 64rem) {
+    .atmo {
+      grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+      align-items: center;
+    }
+  }
+  .atmo__stage {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 16 / 9;
+    border: 1px solid var(--nz-line);
+    border-radius: var(--nz-radius-lg);
+    background: #031d25;
+    box-shadow: 0 30px 60px -30px #000c;
+  }
+  .atmo__stage :global(picture),
+  .atmo__stage :global(img) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .atmo__stage :global(img) {
+    object-fit: cover;
+    transition: filter var(--nz-dur-slow) var(--nz-ease-out);
+  }
+  /*
+   * --day: 1 at noon, 0 at midnight. --warm: strongest near 7:00 and 19:00.
+   * Computed in script; CSS defaults are a clear evening.
+   */
+  .atmo {
+    --day: 0.55;
+    --warm: 0.9;
+  }
+  .atmo__stage :global(img) {
+    filter: brightness(calc(0.35 + var(--day) * 0.75))
+      saturate(calc(0.6 + var(--day) * 0.6));
+  }
+  .atmo__sky {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(180deg, #ff9a4a 0%, #ff7b3a00 60%),
+      linear-gradient(180deg, #0b1c3d 0%, #031d25 100%);
+    background-blend-mode: normal;
+    mix-blend-mode: soft-light;
+    opacity: 1;
+    transition: opacity var(--nz-dur-slow) ease;
+  }
+  .atmo__sky::before,
+  .atmo__sky::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+  }
+  .atmo__sky::before {
+    background: linear-gradient(
+      180deg,
+      #ffb066 0%,
+      #ff8a3d55 45%,
+      transparent 75%
+    );
+    opacity: var(--warm);
+  }
+  .atmo__sky::after {
+    background: linear-gradient(180deg, #06122e 0%, #0b2a4a 60%, #031d25 100%);
+    opacity: calc((1 - var(--day)) * 0.9);
+  }
+  .atmo__fx {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity var(--nz-dur-slow) ease;
+    pointer-events: none;
+  }
+  .atmo__fx--rain {
+    background-image:
+      repeating-linear-gradient(
+        104deg,
+        transparent 0 14px,
+        #d6e8ff59 14px 15px,
+        transparent 15px 31px
+      ),
+      linear-gradient(180deg, #31465a66, #31465a33);
+    background-size:
+      140px 140px,
+      100% 100%;
+  }
+  .atmo__fx--snow {
+    background-image:
+      radial-gradient(2.5px 2.5px at 20px 30px, #fff 50%, transparent 52%),
+      radial-gradient(2px 2px at 80px 70px, #fff 50%, transparent 52%),
+      radial-gradient(3px 3px at 130px 20px, #ffffffd0 50%, transparent 52%),
+      radial-gradient(2px 2px at 160px 110px, #fff 50%, transparent 52%),
+      radial-gradient(2.5px 2.5px at 50px 140px, #fff 50%, transparent 52%),
+      linear-gradient(180deg, #c9d8e666, #e6eef433);
+    background-size:
+      90px 90px,
+      120px 120px,
+      90px 90px,
+      120px 120px,
+      70px 70px,
+      100% 100%;
+  }
+  .atmo__fx--fog {
+    background: radial-gradient(
+      120% 60% at 50% 70%,
+      #dfe9ecd0 0%,
+      #dfe9ec80 50%,
+      #dfe9ec30 100%
+    );
+  }
+  .atmo[data-weather="rain"] .atmo__fx--rain,
+  .atmo[data-weather="snow"] .atmo__fx--snow,
+  .atmo[data-weather="fog"] .atmo__fx--fog {
+    opacity: 1;
+  }
+  .atmo[data-weather="fog"] .atmo__fx--fog {
+    opacity: calc(0.45 + var(--day) * 0.4);
+  }
+  .atmo__badge,
+  .atmo__clock {
+    position: absolute;
+    z-index: 2;
+    margin: 0;
+    padding: 0.25rem 0.7rem;
+    border-radius: var(--nz-radius-pill);
+    background: #031d25d9;
+    color: #f4f7f4;
+    font-size: var(--nz-fs-min);
+    font-weight: 700;
+  }
+  .atmo__badge {
+    left: 0.75rem;
+    bottom: 0.75rem;
+    border: 1px solid #ffffff33;
+  }
+  .atmo__clock {
+    top: 0.75rem;
+    right: 0.75rem;
+    font-family: var(--nz-font-data);
+    font-size: var(--nz-fs-sm);
+    border: 1px solid #ffaa5c;
+  }
+  .atmo__controls {
+    display: grid;
+    gap: var(--nz-space-5);
+    padding: var(--nz-space-5);
+    border: 1px solid var(--nz-line);
+    border-radius: var(--nz-radius-lg);
+    background: var(--nz-panel);
+  }
+  .atmo__weather {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    min-width: 0;
+  }
+  .atmo__weather legend,
+  .atmo__field label {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: var(--nz-space-2);
+    padding: 0;
+    font-size: var(--nz-fs-sm);
+    font-weight: 700;
+  }
+  .atmo__field output {
+    font-family: var(--nz-font-data);
+    color: var(--nz-accent);
+  }
+  .atmo__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--nz-space-2);
+  }
+  .atmo__chip {
+    position: relative;
+  }
+  .atmo__chip input {
+    position: absolute;
+    opacity: 0;
+    inset: 0;
+    margin: 0;
+    cursor: pointer;
+  }
+  .atmo__chip span {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--nz-target);
+    padding: 0 1rem;
+    border: 1px solid var(--nz-line);
+    border-radius: var(--nz-radius-pill);
+    font-size: var(--nz-fs-sm);
+    font-weight: 700;
+  }
+  .atmo__chip input:checked + span {
+    background: var(--nz-accent);
+    border-color: var(--nz-accent);
+    color: var(--nz-on-accent);
+  }
+  .atmo__chip input:focus-visible + span {
+    outline: var(--nz-focus-ring);
+    outline-offset: var(--nz-focus-offset);
+  }
+  .atmo__chip input:disabled + span {
+    opacity: 0.65;
+  }
+  .atmo__field input {
+    width: 100%;
+    min-height: var(--nz-target);
+    margin: 0;
+    accent-color: var(--nz-accent);
+  }
+  .atmo__fine {
+    font-size: var(--nz-fs-sm);
+    color: var(--nz-muted);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .atmo[data-weather="rain"] .atmo__fx--rain {
+      animation: atmo-rain 450ms linear infinite;
+    }
+    .atmo[data-weather="snow"] .atmo__fx--snow {
+      animation: atmo-snow 7s linear infinite;
+    }
+  }
+  @keyframes atmo-rain {
+    to {
+      background-position:
+        -36px 140px,
+        0 0;
+    }
+  }
+  @keyframes atmo-snow {
+    to {
+      background-position:
+        30px 180px,
+        -20px 240px,
+        10px 180px,
+        -30px 240px,
+        20px 140px,
+        0 0;
+    }
+  }
+</style>
+
+<script>
+  for (const root of document.querySelectorAll<HTMLElement>("[data-atmo]")) {
+    const form = root.querySelector<HTMLFormElement>("[data-atmo-form]")!;
+    const clock = root.querySelector<HTMLElement>("[data-clock]")!;
+    const out = root.querySelector<HTMLOutputElement>("[data-hour-out]")!;
+    const range = form.elements.namedItem("hour") as HTMLInputElement;
+    form
+      .querySelectorAll<HTMLInputElement | HTMLFieldSetElement>("[data-enable]")
+      .forEach((el) => (el.disabled = false));
+    const fmt = (h: number) =>
+      `${String(Math.floor(h)).padStart(2, "0")}:${h % 1 ? "30" : "00"}`;
+    const apply = () => {
+      const hour = Number(range.value);
+      // Daylight: a smooth curve from 0 at 3:00 to 1 at 13:00 and back.
+      const day = Math.max(0, Math.sin(((hour - 3) / 20) * Math.PI));
+      // Golden hours around 7:00 and 19:30.
+      const warm = Math.max(
+        Math.exp(-((hour - 7) ** 2) / 2.5),
+        Math.exp(-((hour - 19.5) ** 2) / 2.5),
+      );
+      root.style.setProperty("--day", day.toFixed(3));
+      root.style.setProperty("--warm", warm.toFixed(3));
+      const text = fmt(hour);
+      clock.textContent = text;
+      out.textContent = text;
+      range.setAttribute("aria-valuetext", text);
+      const weather =
+        (form.elements.namedItem("weather") as RadioNodeList).value || "clear";
+      root.dataset.weather = weather;
+    };
+    form.addEventListener("input", apply);
+    form.addEventListener("submit", (event) => event.preventDefault());
+    apply();
+  }
+</script>

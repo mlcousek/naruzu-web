@@ -1,0 +1,108 @@
+---
+/**
+ * The site's signature: a route elevation profile that draws itself once,
+ * like the profile strip in the app's ride HUD. Decorative (aria-hidden).
+ * Static (fully drawn) under reduced motion or without JavaScript.
+ *
+ *   <ElevationLine />                 default climb shape
+ *   <ElevationLine points={[0, 12, 30, 22, 60]} />   your own heights (any scale)
+ */
+interface Props {
+  points?: number[];
+  class?: string;
+}
+
+const DEFAULT = [
+  8, 9, 11, 10, 13, 17, 16, 20, 26, 24, 29, 35, 33, 38, 45, 43, 50, 58, 55, 61,
+  70, 66, 72, 80, 77, 84, 92, 88, 95, 100, 97, 90, 82, 86, 78, 70, 74, 66, 60,
+  63,
+];
+const { points = DEFAULT, class: className } = Astro.props;
+
+const W = 1000;
+const H = 120;
+const max = Math.max(...points);
+const min = Math.min(...points);
+const span = max - min || 1;
+const coords = points.map((p, i) => {
+  const x = (i / (points.length - 1)) * W;
+  const y = H - 8 - ((p - min) / span) * (H - 24);
+  return [Number(x.toFixed(1)), Number(y.toFixed(1))] as const;
+});
+const line = coords.map(([x, y], i) => `${i ? "L" : "M"}${x} ${y}`).join(" ");
+const area = `${line} L${W} ${H} L0 ${H} Z`;
+const [peakX, peakY] = coords.reduce((a, b) => (b[1] < a[1] ? b : a));
+---
+
+<svg
+  class:list={["nz-elevation", className]}
+  viewBox={`0 0 ${W} ${H}`}
+  preserveAspectRatio="none"
+  aria-hidden="true"
+  focusable="false"
+>
+  <defs>
+    <linearGradient id="nz-elev-fill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="var(--nz-accent)" stop-opacity="0.28"></stop>
+      <stop offset="1" stop-color="var(--nz-accent)" stop-opacity="0"></stop>
+    </linearGradient>
+  </defs>
+  <path class="nz-elevation__area" d={area} fill="url(#nz-elev-fill)"></path>
+  <path
+    class="nz-elevation__line"
+    d={line}
+    pathLength="1"
+    fill="none"
+    vector-effect="non-scaling-stroke"
+  ></path>
+  <circle
+    class="nz-elevation__peak"
+    cx={peakX}
+    cy={peakY}
+    r="4"
+    vector-effect="non-scaling-stroke"
+  ></circle>
+</svg>
+
+<style>
+  .nz-elevation {
+    display: block;
+    width: 100%;
+    height: clamp(56px, 9vw, 120px);
+    overflow: visible;
+  }
+  .nz-elevation__line {
+    stroke: var(--nz-accent);
+    stroke-width: 2.5;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .nz-elevation__peak {
+    fill: var(--nz-bg);
+    stroke: var(--nz-accent);
+    stroke-width: 2.5;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    :global(.js) .nz-elevation__line {
+      stroke-dasharray: 1;
+      stroke-dashoffset: 1;
+      animation: nz-draw var(--nz-dur-draw) var(--nz-ease-in-out) 300ms forwards;
+    }
+    :global(.js) .nz-elevation__area,
+    :global(.js) .nz-elevation__peak {
+      opacity: 0;
+      animation: nz-fade 900ms var(--nz-ease-out)
+        calc(var(--nz-dur-draw) - 200ms) forwards;
+    }
+  }
+  @keyframes nz-draw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+  @keyframes nz-fade {
+    to {
+      opacity: 1;
+    }
+  }
+</style>

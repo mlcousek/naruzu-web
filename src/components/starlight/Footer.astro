@@ -1,0 +1,29 @@
+---
+/** Docs page footer: Starlight's own (pagination, edit link) followed by a short site line. */
+import Default from "@astrojs/starlight/components/Footer.astro";
+import { url } from "../../lib/url";
+---
+
+<Default>
+  <slot />
+</Default>
+<p class="nz-doc-footer">
+  <a href={url("/")}>NARUZU</a> documentation, written alongside the app. See
+  also the <a href={url("/docs/user/")}>User guide</a> and the{" "}
+  <a href={url("/docs/dev/")}>Developer docs</a>.
+</p>
+
+<style>
+  .nz-doc-footer {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--sl-color-hairline);
+    color: var(--sl-color-gray-3);
+    font-size: var(--sl-text-sm);
+  }
+  .nz-doc-footer a {
+    display: inline-block;
+    min-height: 24px;
+    color: var(--sl-color-text-accent);
+  }
+</style>

@@ -1,0 +1,511 @@
+---
+/**
+ * Interactive HUD demo: sliders for power, cadence and gradient drive a
+ * simplified speed model, W/kg, the power zone colour (the app's zone
+ * colours) and a drifting elevation trace. Clearly a demo, not real data.
+ *
+ * Without JavaScript the sliders are disabled and the HUD shows the values
+ * for the default settings, computed at build time with the same model.
+ */
+import { DEMO, demoSpeed, demoZone } from "../../lib/hudDemo";
+
+const initial = {
+  power: 220,
+  cadence: 88,
+  grade: 4,
+};
+const speed = demoSpeed(initial.power, initial.grade);
+const zone = demoZone(initial.power);
+const wkg = initial.power / DEMO.riderKg;
+---
+
+<div class="hud" data-hud-demo style={`--zone: ${zone.color}`}>
+  <div class="hud__screen" aria-label="Demo ride screen" role="group">
+    <p class="hud__badge">
+      <span aria-hidden="true">●</span> Demo · not real ride data
+    </p>
+    <div class="hud__bar">
+      <div class="hud__metric hud__metric--power">
+        <span class="hud__label">Power</span>
+        <span class="hud__value">
+          <output data-out="power">{initial.power}</output>
+          <small> W</small>
+        </span>
+        <span class="hud__zone" data-out="zone">
+          Z{zone.zone} {zone.name}
+        </span>
+      </div>
+      <div class="hud__metric">
+        <span class="hud__label">Speed</span>
+        <span class="hud__value">
+          <output data-out="speed">{speed.toFixed(1)}</output>
+          <small> km/h</small>
+        </span>
+      </div>
+      <div class="hud__metric">
+        <span class="hud__label">Cadence</span>
+        <span class="hud__value">
+          <output data-out="cadence">{initial.cadence}</output>
+          <small> rpm</small>
+        </span>
+      </div>
+      <div class="hud__metric">
+        <span class="hud__label">W/kg</span>
+        <span class="hud__value">
+          <output data-out="wkg">{wkg.toFixed(1)}</output>
+        </span>
+      </div>
+      <div class="hud__metric">
+        <span class="hud__label">Grade</span>
+        <span class="hud__value">
+          <output data-out="grade">{initial.grade.toFixed(1)}</output>
+          <small>%</small>
+        </span>
+      </div>
+    </div>
+    <div class="hud__world" aria-hidden="true">
+      <canvas class="hud__canvas" width="720" height="220" data-canvas></canvas>
+      <svg class="hud__wheel" viewBox="-30 -30 60 60" data-wheel>
+        <circle r="24"></circle>
+        <path d="M0 -24 V24 M-24 0 H24 M-17 -17 L17 17 M-17 17 L17 -17"></path>
+      </svg>
+    </div>
+    <p class="nz-visually-hidden" aria-live="polite" data-live></p>
+  </div>
+
+  <form class="hud__controls" data-controls aria-label="Demo controls">
+    <div class="hud__field">
+      <label for="hud-power">
+        Power <span data-v="power">{initial.power} W</span>
+      </label>
+      <input
+        id="hud-power"
+        name="power"
+        type="range"
+        min="0"
+        max="600"
+        step="5"
+        value={initial.power}
+        disabled
+        aria-valuetext={`${initial.power} watts`}
+      />
+    </div>
+    <div class="hud__field">
+      <label for="hud-cadence">
+        Cadence <span data-v="cadence">{initial.cadence} rpm</span>
+      </label>
+      <input
+        id="hud-cadence"
+        name="cadence"
+        type="range"
+        min="40"
+        max="130"
+        step="1"
+        value={initial.cadence}
+        disabled
+        aria-valuetext={`${initial.cadence} rpm`}
+      />
+    </div>
+    <div class="hud__field">
+      <label for="hud-grade">
+        Gradient <span data-v="grade">{initial.grade.toFixed(1)} %</span>
+      </label>
+      <input
+        id="hud-grade"
+        name="grade"
+        type="range"
+        min="-8"
+        max="15"
+        step="0.5"
+        value={initial.grade}
+        disabled
+        aria-valuetext={`${initial.grade} percent`}
+      />
+    </div>
+    <div class="hud__buttons">
+      <button
+        type="button"
+        class="hud__btn"
+        data-pause
+        disabled
+        aria-pressed="false"
+      >
+        Pause animation
+      </button>
+      <button type="reset" class="hud__btn" disabled>
+        Reset
+      </button>
+    </div>
+    <p class="hud__fine">
+      A simplified model for a {DEMO.riderKg} kg rider with FTP {DEMO.ftp} W on
+      a {DEMO.bikeKg} kg bike, in still air. The app uses your own weight, FTP
+      and bike mass.
+    </p>
+  </form>
+</div>
+
+<style>
+  .hud {
+    display: grid;
+    gap: var(--nz-space-5);
+  }
+  @media (min-width: 64rem) {
+    .hud {
+      grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+      align-items: start;
+    }
+  }
+  .hud__screen {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid #36565e;
+    border-radius: var(--nz-radius-lg);
+    background: linear-gradient(
+      180deg,
+      #8fb7c9 0%,
+      #c9d9cf 46%,
+      #6f9a5f 47%,
+      #4c7a45 100%
+    );
+    color: #f4f7f4;
+    box-shadow: 0 30px 60px -30px #000c;
+  }
+  .hud__badge {
+    position: absolute;
+    right: 0.75rem;
+    bottom: 0.75rem;
+    z-index: 2;
+    padding: 0.25rem 0.7rem;
+    border-radius: var(--nz-radius-pill);
+    background: #031d25d9;
+    border: 1px solid #ffaa5c;
+    color: #ffc082;
+    font-size: var(--nz-fs-min);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+  .hud__badge span {
+    color: #ffaa5c;
+  }
+  .hud__bar {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    margin: 0.75rem;
+    border: 1px solid #ffffff26;
+    border-radius: 14px;
+    background: #082b34f2;
+  }
+  .hud__metric {
+    display: grid;
+    justify-items: center;
+    align-content: start;
+    gap: 0.1rem;
+    padding: 0.6rem 0.25rem 0.7rem;
+    text-align: center;
+  }
+  .hud__metric + .hud__metric {
+    border-left: 1px solid #ffffff1a;
+  }
+  .hud__metric--power {
+    border-bottom: 3px solid var(--zone);
+    border-radius: 14px 0 0 14px;
+    transition: border-color var(--nz-dur) ease;
+  }
+  .hud__label {
+    font-size: var(--nz-fs-min);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #b7cdd3;
+  }
+  .hud__value {
+    font-family: var(--nz-font-data);
+    font-size: clamp(1.15rem, 0.8rem + 1.6vw, 2rem);
+    font-weight: 700;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+  }
+  /* Fixed widths so changing digits never move their neighbours. */
+  .hud__value output {
+    display: inline-block;
+    min-width: 3ch;
+    text-align: right;
+  }
+  .hud__value small {
+    font-size: 0.45em;
+    color: #b7cdd3;
+  }
+  .hud__zone {
+    margin-top: 0.15rem;
+    padding: 0.05rem 0.45rem;
+    border-radius: 6px;
+    background: var(--zone);
+    color: #14262b;
+    font-size: var(--nz-fs-min);
+    font-weight: 800;
+    white-space: nowrap;
+    transition: background-color var(--nz-dur) ease;
+  }
+  .hud__world {
+    position: relative;
+    height: clamp(150px, 22vw, 230px);
+  }
+  .hud__canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .hud__wheel {
+    position: absolute;
+    left: 1rem;
+    bottom: 1rem;
+    width: 3rem;
+    height: 3rem;
+    fill: #031d25cc;
+    stroke: #f4f7f4;
+    stroke-width: 2.5;
+  }
+  .hud__controls {
+    display: grid;
+    gap: var(--nz-space-4);
+    padding: var(--nz-space-5);
+    border: 1px solid var(--nz-line);
+    border-radius: var(--nz-radius-lg);
+    background: var(--nz-panel);
+  }
+  .hud__field {
+    display: grid;
+    gap: var(--nz-space-2);
+  }
+  .hud__field label {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 700;
+    font-size: var(--nz-fs-sm);
+  }
+  .hud__field label span {
+    font-family: var(--nz-font-data);
+    color: var(--nz-accent);
+    font-variant-numeric: tabular-nums;
+  }
+  .hud__field input {
+    width: 100%;
+    min-height: var(--nz-target);
+    margin: 0;
+    accent-color: var(--nz-accent);
+    cursor: pointer;
+  }
+  .hud__field input:disabled {
+    cursor: not-allowed;
+  }
+  .hud__buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--nz-space-2);
+  }
+  .hud__btn {
+    min-height: var(--nz-target);
+    padding: 0 1rem;
+    border: 1px solid var(--nz-line);
+    border-radius: var(--nz-radius-sm);
+    background: transparent;
+    color: var(--nz-text);
+    font-size: var(--nz-fs-sm);
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .hud__btn:hover:not(:disabled) {
+    border-color: var(--nz-accent);
+  }
+  .hud__btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  .hud__fine {
+    font-size: var(--nz-fs-min);
+    color: var(--nz-muted);
+  }
+  @media (max-width: 40rem) {
+    .hud__bar {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .hud__metric:nth-child(4) {
+      border-left: 0;
+    }
+    .hud__metric:nth-child(n + 4) {
+      border-top: 1px solid #ffffff1a;
+    }
+    .hud__metric--power {
+      border-radius: 14px 0 0 0;
+    }
+  }
+</style>
+
+<script>
+  import { DEMO, demoSpeed, demoZone } from "../../lib/hudDemo";
+  import { reducedMotion, visibleLoop } from "../../lib/motion";
+
+  for (const root of document.querySelectorAll<HTMLElement>(
+    "[data-hud-demo]",
+  )) {
+    const form = root.querySelector<HTMLFormElement>("[data-controls]")!;
+    const inputs = {
+      power: form.elements.namedItem("power") as HTMLInputElement,
+      cadence: form.elements.namedItem("cadence") as HTMLInputElement,
+      grade: form.elements.namedItem("grade") as HTMLInputElement,
+    };
+    const out = (name: string) =>
+      root.querySelector<HTMLElement>(`[data-out="${name}"]`)!;
+    const label = (name: string) =>
+      root.querySelector<HTMLElement>(`[data-v="${name}"]`)!;
+    const canvas = root.querySelector<HTMLCanvasElement>("[data-canvas]")!;
+    const wheel = root.querySelector<SVGElement>("[data-wheel]")!;
+    const live = root.querySelector<HTMLElement>("[data-live]")!;
+    const pause = root.querySelector<HTMLButtonElement>("[data-pause]")!;
+    const ctx = canvas.getContext("2d");
+    for (const el of form.querySelectorAll<
+      HTMLInputElement | HTMLButtonElement
+    >("input, button"))
+      el.disabled = false;
+
+    // Shown speed eases towards the model's steady speed, like a rider settling in.
+    let shown = Number(out("speed").textContent) || 0;
+    let target = shown;
+    let distance = 0;
+    let angle = 0;
+    // Elevation trace: heights sampled every metre-ish of virtual travel.
+    const trace: number[] = Array.from({ length: 120 }, () => 0);
+    let height = 0;
+    let carry = 0;
+    let liveTimer = 0;
+
+    const read = () => ({
+      power: Number(inputs.power.value),
+      cadence: Number(inputs.cadence.value),
+      grade: Number(inputs.grade.value),
+    });
+
+    const sync = (announce = true) => {
+      const { power, cadence, grade } = read();
+      target = demoSpeed(power, grade);
+      const zone = demoZone(power);
+      root.style.setProperty("--zone", zone.color);
+      out("power").textContent = String(power);
+      out("cadence").textContent = String(cadence);
+      out("wkg").textContent = (power / DEMO.riderKg).toFixed(1);
+      out("grade").textContent = grade.toFixed(1);
+      out("zone").textContent = `Z${zone.zone} ${zone.name}`;
+      label("power").textContent = `${power} W`;
+      label("cadence").textContent = `${cadence} rpm`;
+      label("grade").textContent = `${grade.toFixed(1)} %`;
+      inputs.power.setAttribute(
+        "aria-valuetext",
+        `${power} watts, zone ${zone.zone} ${zone.name}`,
+      );
+      inputs.cadence.setAttribute("aria-valuetext", `${cadence} rpm`);
+      inputs.grade.setAttribute("aria-valuetext", `${grade} percent`);
+      if (reducedMotion() || !loop.running) {
+        shown = target;
+        out("speed").textContent = shown.toFixed(1);
+        draw();
+      }
+      if (announce) {
+        clearTimeout(liveTimer);
+        liveTimer = window.setTimeout(() => {
+          live.textContent = `Demo: ${power} watts, zone ${zone.zone}, ${(power / DEMO.riderKg).toFixed(1)} watts per kilo, about ${target.toFixed(1)} kilometres per hour on ${grade} percent.`;
+        }, 700);
+      }
+    };
+
+    const css = (name: string) =>
+      getComputedStyle(root).getPropertyValue(name).trim();
+
+    const draw = () => {
+      if (!ctx) return;
+      const w = canvas.width;
+      const h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+      const min = Math.min(...trace) - 6;
+      const max = Math.max(...trace) + 6;
+      const span = Math.max(30, max - min);
+      const yOf = (v: number) => h - 18 - ((v - min) / span) * (h - 60);
+      ctx.beginPath();
+      trace.forEach((v, i) => {
+        const x = (i / (trace.length - 1)) * w;
+        if (i) ctx.lineTo(x, yOf(v));
+        else ctx.moveTo(x, yOf(v));
+      });
+      ctx.lineTo(w, h);
+      ctx.lineTo(0, h);
+      ctx.closePath();
+      const grad = ctx.createLinearGradient(0, 0, 0, h);
+      grad.addColorStop(0, "#031d25cc");
+      grad.addColorStop(1, "#031d2533");
+      ctx.fillStyle = grad;
+      ctx.fill();
+      ctx.beginPath();
+      trace.forEach((v, i) => {
+        const x = (i / (trace.length - 1)) * w;
+        if (i) ctx.lineTo(x, yOf(v));
+        else ctx.moveTo(x, yOf(v));
+      });
+      ctx.lineWidth = 4;
+      ctx.lineJoin = "round";
+      ctx.strokeStyle = css("--zone") || "#ffaa5c";
+      ctx.stroke();
+      // The rider's dot at the right edge.
+      const ry = yOf(trace[trace.length - 1]!);
+      ctx.beginPath();
+      ctx.arc(w - 10, ry, 8, 0, Math.PI * 2);
+      ctx.fillStyle = "#f4f7f4";
+      ctx.fill();
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = "#031d25";
+      ctx.stroke();
+    };
+
+    const loop = visibleLoop(root, (dt) => {
+      const { cadence, grade } = read();
+      shown += (target - shown) * Math.min(1, dt * 1.6);
+      out("speed").textContent = shown.toFixed(1);
+      const metres = (shown / 3.6) * dt;
+      distance += metres;
+      // A gentle wobble on top of the chosen gradient so the line keeps drifting.
+      carry += metres * 6;
+      while (carry >= 1) {
+        carry -= 1;
+        const wobble =
+          Math.sin(distance / 37) * 0.9 + Math.sin(distance / 13) * 0.4;
+        height += ((grade + wobble) / 100) * 6;
+        trace.shift();
+        trace.push(height);
+      }
+      angle = (angle + (cadence / 60) * 360 * dt * 0.5) % 360;
+      wheel.style.transform = `rotate(${angle.toFixed(1)}deg)`;
+      draw();
+    });
+
+    form.addEventListener("input", () => sync());
+    form.addEventListener("reset", () => requestAnimationFrame(() => sync()));
+    form.addEventListener("submit", (event) => event.preventDefault());
+    pause.addEventListener("click", () => {
+      const pausing = pause.getAttribute("aria-pressed") !== "true";
+      pause.setAttribute("aria-pressed", String(pausing));
+      pause.textContent = pausing ? "Resume animation" : "Pause animation";
+      if (pausing) loop.pause();
+      else loop.resume();
+    });
+    if (reducedMotion()) {
+      pause.hidden = true;
+      // A static but representative trace.
+      for (let i = 0; i < trace.length; i++)
+        trace[i] =
+          i * Number(inputs.grade.value) * 0.06 + Math.sin(i / 6) * 1.5;
+    }
+    sync(false);
+    draw();
+  }
+</script>

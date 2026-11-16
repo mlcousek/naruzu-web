@@ -1,0 +1,110 @@
+---
+/**
+ * Docs header: the same brand and primary destinations as the marketing Nav,
+ * plus Starlight's search (Pagefind) and the shared ThemeToggle.
+ */
+import Search from "@astrojs/starlight/components/Search.astro";
+import BrandMark from "../BrandMark.astro";
+import ThemeToggle from "../ThemeToggle.astro";
+import { NAV } from "../../config/site";
+import { isCurrent, url } from "../../lib/url";
+
+const pathname = Astro.url.pathname;
+---
+
+<div class="nz-doc-header">
+  <a class="nz-doc-header__brand" href={url("/")} aria-label="NARUZU home">
+    <BrandMark size={30} />
+    <span aria-hidden="true">NARUZU</span>
+  </a>
+  <div class="nz-doc-header__search print:hidden">
+    <Search />
+  </div>
+  <nav class="nz-doc-header__nav" aria-label="Site">
+    <ul>
+      {NAV.map((item) => (
+        <li>
+          <a
+            href={url(item.href)}
+            aria-current={
+              isCurrent(pathname, item.href, item.section) ? "page" : undefined
+            }
+          >
+            {item.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+  <ThemeToggle class="nz-doc-header__theme" />
+</div>
+
+<style>
+  .nz-doc-header {
+    display: flex;
+    align-items: center;
+    gap: var(--sl-nav-gap);
+    height: 100%;
+  }
+  .nz-doc-header__brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-height: 44px;
+    color: var(--sl-color-white);
+    font-weight: 600;
+    letter-spacing: 0.3em;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .nz-doc-header__search {
+    display: flex;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .nz-doc-header__nav {
+    display: none;
+  }
+  .nz-doc-header__nav ul {
+    display: flex;
+    gap: 0.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .nz-doc-header__nav a {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 0.7rem;
+    border-radius: 10px;
+    color: var(--sl-color-gray-2);
+    font-size: var(--sl-text-sm);
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .nz-doc-header__nav a:hover,
+  .nz-doc-header__nav a[aria-current="page"] {
+    color: var(--sl-color-white);
+  }
+  .nz-doc-header__nav a[aria-current="page"]::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0.7rem;
+    bottom: 6px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--nz-accent);
+  }
+  @media (min-width: 72rem) {
+    .nz-doc-header__nav {
+      display: block;
+    }
+    .nz-doc-header__search {
+      flex: 0 1 22rem;
+      margin-inline-end: auto;
+    }
+  }
+</style>

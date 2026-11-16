@@ -1,0 +1,116 @@
+/*
+ * NARUZU website design tokens.
+ *
+ * Taken from the app's menu skin (apps/web/src/menu-rebrand.css, style.css,
+ * styles/tokens.css) so the site and the app read as one product: deep teal
+ * night, amber accent, mint ink, glass panels and a 12 px text floor.
+ * Dark is the default; [data-theme="light"] on <html> switches the palette.
+ * Every text/background pair below meets WCAG 2.2 AA (4.5:1 body, 3:1 large
+ * text and UI); the ratios are noted where the pair is used most.
+ */
+:root {
+  color-scheme: dark;
+
+  /* Palette (dark) */
+  --nz-bg: #031d25; /* app --bg */
+  --nz-bg-raised: #04232b; /* app --side */
+  --nz-panel: #082b34; /* app --menu-panel */
+  --nz-panel-strong: #10313a; /* app --panel */
+  --nz-line: #36565e; /* app --line */
+  --nz-line-soft: #ffffff1f; /* app --glass-line */
+  --nz-text: #f4f7f4; /* app --color-ink-mint, 16.9:1 on --nz-bg */
+  --nz-muted: #b7cdd3; /* app --muted, 11.2:1 on --nz-bg */
+  --nz-accent: #ffaa5c; /* app --color-amber, 9.6:1 on --nz-bg */
+  --nz-accent-strong: #ffc082; /* app --accent-strong (hover) */
+  --nz-on-accent: #14262b; /* app --on-accent, 8.4:1 on --nz-accent */
+  --nz-mint: #8dc8aa; /* app --color-green, 9.4:1 on --nz-bg */
+  --nz-contour: #39717a; /* app contours.svg stroke */
+  --nz-glass: #0d1f27d9; /* app --glass */
+  --nz-shade: #031d25; /* image scrims */
+  --nz-focus: #ffaa5c;
+
+  /* Type: system faces only (no web-font downloads). The app uses Segoe UI
+     for interface text and Georgia for its big ride titles. */
+  --nz-font-body:
+    "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --nz-font-display:
+    Georgia, "Iowan Old Style", "Palatino Linotype", Palatino,
+    "Times New Roman", serif;
+  --nz-font-data:
+    "Cascadia Mono", "Segoe UI Mono", ui-monospace, SFMono-Regular, Menlo,
+    Consolas, monospace;
+
+  /* Fluid type scale, 360 -> 1920 px viewports. Nothing below 12 px. */
+  --nz-fs-min: 0.75rem; /* 12 px floor, app --fs-min */
+  --nz-fs-sm: clamp(0.8125rem, 0.79rem + 0.1vw, 0.875rem);
+  --nz-fs-base: clamp(1rem, 0.96rem + 0.18vw, 1.125rem);
+  --nz-fs-lead: clamp(1.125rem, 1.05rem + 0.35vw, 1.375rem);
+  --nz-fs-h3: clamp(1.25rem, 1.15rem + 0.45vw, 1.625rem);
+  --nz-fs-h2: clamp(1.75rem, 1.45rem + 1.4vw, 3rem);
+  --nz-fs-h1: clamp(2.5rem, 1.85rem + 3.2vw, 5.5rem);
+  --nz-fs-hero: clamp(2.75rem, 1.8rem + 4.6vw, 7rem);
+
+  --nz-lh-tight: 1.04;
+  --nz-lh-snug: 1.2;
+  --nz-lh-body: 1.6;
+  --nz-tracking-eyebrow: 0.22em;
+
+  /* Space: a 4 px base, fluid for the large steps. */
+  --nz-space-1: 0.25rem;
+  --nz-space-2: 0.5rem;
+  --nz-space-3: 0.75rem;
+  --nz-space-4: 1rem;
+  --nz-space-5: 1.5rem;
+  --nz-space-6: 2rem;
+  --nz-space-7: clamp(2.5rem, 1.9rem + 2.6vw, 4rem);
+  --nz-space-8: clamp(3.5rem, 2.4rem + 4.8vw, 7rem);
+
+  /* Layout */
+  --nz-max: 80rem; /* 1280 px content measure */
+  --nz-max-wide: 105rem; /* 1680 px, the app's main max-width */
+  --nz-measure: 68ch;
+  --nz-gutter: clamp(1rem, 0.6rem + 2vw, 2.5rem);
+  --nz-nav-h: 4rem;
+
+  /* Shape */
+  --nz-radius-sm: 10px; /* app buttons */
+  --nz-radius: 14px; /* app panels */
+  --nz-radius-lg: 18px; /* app hero */
+  --nz-radius-pill: 999px;
+  --nz-shadow: 0 1px 0 #ffffff0d inset, 0 18px 40px -24px #000c;
+
+  /* Targets and focus (WCAG 2.2: 2.5.8, 2.4.11, 2.4.13) */
+  --nz-target: 44px;
+  --nz-focus-ring: 3px solid var(--nz-focus);
+  --nz-focus-offset: 3px;
+
+  /* Motion. Durations collapse to 0 under prefers-reduced-motion (base.css). */
+  --nz-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --nz-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --nz-dur-fast: 140ms;
+  --nz-dur: 260ms;
+  --nz-dur-slow: 700ms;
+  --nz-dur-draw: 2200ms;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --nz-bg: #e6efee; /* app light --bg */
+  --nz-bg-raised: #dae8e6; /* app light --side */
+  --nz-panel: #f6fbf9; /* app light --menu-panel */
+  --nz-panel-strong: #f7fbf9;
+  --nz-line: #9db9ba;
+  --nz-line-soft: #18313e26;
+  --nz-text: #12343c; /* 11.0:1 on --nz-bg */
+  --nz-muted: #3b616a; /* 5.7:1 on --nz-bg */
+  --nz-accent: #9c4205; /* 5.6:1 on --nz-bg */
+  --nz-accent-strong: #b34c08;
+  --nz-on-accent: #ffffff; /* 7.1:1 on --nz-accent */
+  --nz-mint: #1f6b4a;
+  --nz-contour: #6f9fa3;
+  --nz-glass: #f6faf9e6;
+  --nz-shade: #e6efee;
+  --nz-focus: #9c4205;
+  --nz-shadow: 0 1px 0 #ffffff inset, 0 18px 40px -26px #12343c66;
+}

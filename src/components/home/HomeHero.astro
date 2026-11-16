@@ -1,0 +1,487 @@
+---
+/**
+ * Home hero: layered scenery with parallax (scroll and pointer), a route that
+ * draws itself with a rider silhouette riding it, and a time-of-day shift
+ * from golden hour to night as the hero scrolls away.
+ *
+ * Without JavaScript or under reduced motion it is a still picture: the route
+ * is drawn, the rider waits at the first bend and nothing moves.
+ */
+import Scenery from "../Scenery.astro";
+import Button from "../Button.astro";
+
+interface Props {
+  version: string;
+}
+const { version } = Astro.props;
+
+// The route the rider follows, in the 1600 x 900 viewBox of the overlay.
+const ROUTE =
+  "M -40 828 C 140 800 250 742 410 752 S 640 812 812 742 S 1040 588 1188 612 S 1420 548 1500 470";
+// Where the rider waits without JavaScript: the end of the second curve.
+const REST = { x: 812, y: 742 };
+const PINS = [
+  { x: 410, y: 752 },
+  { x: 1188, y: 612 },
+];
+const SUMMIT = { x: 1500, y: 470 };
+---
+
+<section class="hh" aria-labelledby="hh-title" data-home-hero>
+  <div class="hh__layer hh__art" data-depth="0.12">
+    <Scenery name="lake-road" priority position="center 62%" sizes="100vw" />
+  </div>
+  <div class="hh__dusk" aria-hidden="true"></div>
+  <div class="hh__stars" aria-hidden="true"></div>
+  <svg
+    class="hh__layer hh__ridge"
+    data-depth="0.3"
+    viewBox="0 0 1600 900"
+    preserveAspectRatio="xMidYMax slice"
+    aria-hidden="true"
+    focusable="false"
+  >
+    <path
+      d="M0 760 L120 700 L210 728 L330 640 L420 690 L560 610 L690 676 L790 630 L930 700 L1080 620 L1210 668 L1330 600 L1460 650 L1600 590 L1600 900 L0 900 Z"
+      fill="#04232b"
+      opacity="0.55"
+    ></path>
+    <path
+      d="M0 820 C 220 770 360 800 520 780 S 860 820 1040 770 S 1380 760 1600 720 L1600 900 L0 900 Z"
+      fill="#031d25"
+      opacity="0.7"
+    ></path>
+  </svg>
+  <svg
+    class="hh__layer hh__route"
+    data-depth="0.5"
+    viewBox="0 0 1600 900"
+    preserveAspectRatio="xMidYMax slice"
+    aria-hidden="true"
+    focusable="false"
+  >
+    <defs>
+      <filter id="hh-glow" x="-20%" y="-20%" width="140%" height="140%">
+        <feGaussianBlur stdDeviation="6"></feGaussianBlur>
+      </filter>
+    </defs>
+    <path class="hh__road-glow" d={ROUTE} filter="url(#hh-glow)"></path>
+    <path class="hh__road" d={ROUTE} pathLength="1" data-route></path>
+    {PINS.map((p) => (
+      <circle class="hh__pin" cx={p.x} cy={p.y} r="7" />
+    ))}
+    <g class="hh__summit" transform={`translate(${SUMMIT.x} ${SUMMIT.y})`}>
+      <circle r="16" class="hh__summit-halo"></circle>
+      <circle r="8" class="hh__summit-dot"></circle>
+    </g>
+    <g
+      class="hh__rider"
+      data-rider
+      transform={`translate(${REST.x} ${REST.y})`}
+    >
+      <g transform="translate(-34 -50)">
+        <circle cx="14" cy="38" r="11"></circle>
+        <circle cx="54" cy="38" r="11"></circle>
+        <path d="M14 38 L28 38 L24 23 Z M28 38 L46 22 L54 38 M24 23 L44 21 L47 17 M24 20 L22 19"></path>
+        <path
+          class="hh__rider-body"
+          d="M24 20 L41 12 L47 19 M24 20 L31 29 L28 38"
+        ></path>
+        <circle class="hh__rider-head" cx="45" cy="7" r="4"></circle>
+      </g>
+    </g>
+  </svg>
+  <div class="hh__scrim" aria-hidden="true"></div>
+
+  <div class="hh__inner nz-container nz-container--wide">
+    <div class="hh__copy">
+      <p class="hh__status">
+        <span class="hh__status-dot" aria-hidden="true"></span>
+        Public beta {version} · shared personally with testers
+      </p>
+      <h1 id="hh-title" class="hh__title">
+        Ride real roads <span class="hh__nowrap">from home</span>
+        <span class="hh__dot" aria-hidden="true">
+          .
+        </span>
+      </h1>
+      <p class="hh__lead">
+        Pair your smart trainer, pick a road or a workout, and NARUZU builds the
+        world around you as you pedal. Your rides stay on your own computer.
+      </p>
+      <div class="hh__actions">
+        <Button href="/docs/user/">Get started</Button>
+        <Button href="/docs/dev/" variant="secondary">
+          For developers
+        </Button>
+      </div>
+      <p class="hh__note">
+        Free during the beta. Windows first; trainer support is in testing.
+      </p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hh {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    align-items: center;
+    overflow: hidden;
+    min-height: min(92svh, 920px);
+    padding-block: var(--nz-space-8) calc(var(--nz-space-8) + 4rem);
+    color: #f4f7f4;
+    background: #031d25;
+  }
+  .hh__layer,
+  .hh__dusk,
+  .hh__stars,
+  .hh__scrim {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .hh__art {
+    inset: -4% -3% -2%;
+    z-index: -6;
+  }
+  .hh__art :global(picture),
+  .hh__art :global(img) {
+    width: 100%;
+    height: 100%;
+  }
+  .hh__art :global(img) {
+    object-fit: cover;
+  }
+  /* Time of day: --night goes 0 (golden hour) to 1 (night) with scroll. */
+  .hh__dusk {
+    z-index: -5;
+    background: linear-gradient(180deg, #071a3a 0%, #0b2a4a 45%, #031d25 100%);
+    opacity: calc(var(--night, 0) * 0.72);
+  }
+  .hh__stars {
+    z-index: -4;
+    opacity: calc((var(--night, 0) - 0.25) * 1.4);
+    background-image:
+      radial-gradient(1.5px 1.5px at 12% 14%, #fff 50%, transparent 51%),
+      radial-gradient(1px 1px at 22% 30%, #fff 50%, transparent 51%),
+      radial-gradient(1.5px 1.5px at 38% 9%, #fff 50%, transparent 51%),
+      radial-gradient(1px 1px at 47% 22%, #dfefff 50%, transparent 51%),
+      radial-gradient(1.5px 1.5px at 61% 12%, #fff 50%, transparent 51%),
+      radial-gradient(1px 1px at 70% 27%, #fff 50%, transparent 51%),
+      radial-gradient(1.5px 1.5px at 83% 8%, #fff 50%, transparent 51%),
+      radial-gradient(1px 1px at 91% 20%, #dfefff 50%, transparent 51%),
+      radial-gradient(1px 1px at 5% 36%, #fff 50%, transparent 51%),
+      radial-gradient(1px 1px at 55% 34%, #fff 50%, transparent 51%);
+  }
+  .hh__ridge {
+    z-index: -3;
+    inset: auto -3% -2% -3%;
+    height: 100%;
+    width: 106%;
+  }
+  .hh__route {
+    z-index: -2;
+    inset: auto -2% 0 -2%;
+    height: 100%;
+    width: 104%;
+  }
+  .hh__road,
+  .hh__road-glow {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .hh__road {
+    stroke: #ffaa5c;
+    stroke-width: 4;
+  }
+  .hh__road-glow {
+    stroke: #ffaa5c;
+    stroke-width: 14;
+    opacity: 0.45;
+  }
+  .hh__pin {
+    fill: #031d25;
+    stroke: #8dc8aa;
+    stroke-width: 3;
+  }
+  .hh__summit-halo {
+    fill: #ffaa5c33;
+    stroke: #ffaa5c;
+    stroke-width: 2;
+  }
+  .hh__summit-dot {
+    fill: #ffaa5c;
+  }
+  .hh__rider {
+    fill: none;
+    stroke: #f4f7f4;
+    stroke-width: 3.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .hh__rider-body {
+    stroke: #ffaa5c;
+    stroke-width: 4.4;
+  }
+  .hh__rider-head {
+    fill: #f4f7f4;
+    stroke: none;
+  }
+  .hh__scrim {
+    z-index: -1;
+    background:
+      linear-gradient(180deg, #031d2599 0%, #031d2500 26%),
+      linear-gradient(90deg, #03232bf0 0%, #03232bc7 36%, #03232b26 74%),
+      linear-gradient(0deg, var(--nz-bg) 0%, #031d2500 22%);
+  }
+  .hh__copy {
+    max-width: 46rem;
+  }
+  .hh__status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-height: 2.25rem;
+    padding: 0.25rem 0.9rem;
+    border: 1px solid #ffffff33;
+    border-radius: var(--nz-radius-pill);
+    background: #0d1f27b3;
+    font-size: var(--nz-fs-sm);
+    font-weight: 600;
+    color: #dbe7e8;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  .hh__status-dot {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+    background: #8dc8aa;
+    box-shadow: 0 0 0 4px #8dc8aa33;
+  }
+  .hh__title {
+    margin-top: var(--nz-space-5);
+    font-family: var(--nz-font-display);
+    font-size: var(--nz-fs-hero);
+    font-weight: 600;
+    line-height: var(--nz-lh-tight);
+    letter-spacing: -0.03em;
+    color: #f4f7f4;
+  }
+  .hh__nowrap {
+    white-space: nowrap;
+  }
+  .hh__dot {
+    color: #ffaa5c;
+  }
+  .hh__lead {
+    margin-top: var(--nz-space-5);
+    max-width: 38rem;
+    font-size: var(--nz-fs-lead);
+    line-height: 1.5;
+    color: #dbe7e8;
+  }
+  .hh__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--nz-space-3);
+    margin-top: var(--nz-space-6);
+  }
+  .hh__actions :global(.nz-button) {
+    min-height: 3rem;
+    padding-inline: 1.5rem;
+    font-size: var(--nz-fs-base);
+  }
+  .hh__actions :global(.nz-button--primary) {
+    background: #ffaa5c;
+    border-color: #ffaa5c;
+    color: #14262b;
+  }
+  .hh__actions :global(.nz-button--primary:hover) {
+    background: #ffc082;
+    border-color: #ffc082;
+  }
+  .hh__actions :global(.nz-button--primary:focus-visible) {
+    outline-color: #ffaa5c;
+  }
+  .hh__actions :global(.nz-button--secondary) {
+    background: #0d1f27b3;
+    border-color: #ffffff40;
+    color: #f4f7f4;
+  }
+  .hh__actions :global(.nz-button--secondary:focus-visible) {
+    outline-color: #ffaa5c;
+  }
+  .hh__note {
+    margin-top: var(--nz-space-4);
+    font-size: var(--nz-fs-sm);
+    color: #b7cdd3;
+  }
+
+  @media (max-width: 40rem) {
+    /* Narrow screens: keep the sunset and the lake in the frame, not just sky. */
+    .hh__art :global(img) {
+      object-position: 80% 70% !important;
+    }
+    .hh {
+      align-items: end;
+      padding-bottom: calc(var(--nz-space-8) + 2rem);
+    }
+    .hh__scrim {
+      background:
+        linear-gradient(
+          180deg,
+          #031d2526 0%,
+          #031d2540 24%,
+          #031d25c7 52%,
+          #031d25f0 100%
+        ),
+        linear-gradient(0deg, var(--nz-bg) 0%, #031d2500 20%);
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .hh__layer {
+      will-change: transform;
+    }
+    :global(.js) .hh__road {
+      stroke-dasharray: 1;
+      stroke-dashoffset: 1;
+      animation: hh-draw 2600ms var(--nz-ease-in-out) 250ms forwards;
+    }
+    :global(.js) .hh__road-glow,
+    :global(.js) .hh__pin,
+    :global(.js) .hh__summit {
+      opacity: 0;
+      animation: hh-fade 900ms var(--nz-ease-out) 2300ms forwards;
+    }
+    :global(.js) .hh__road-glow {
+      animation-name: hh-glow;
+    }
+    :global(.js) .hh__rider {
+      opacity: 0;
+      animation: hh-fade 500ms var(--nz-ease-out) 300ms forwards;
+    }
+    :global(.js) .hh__summit-halo {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: hh-pulse 1600ms var(--nz-ease-out) 3200ms 3;
+    }
+    :global(.js) .hh__copy > * {
+      animation: hh-in 900ms var(--nz-ease-out) both;
+    }
+    :global(.js) .hh__copy > :nth-child(2) {
+      animation-delay: 90ms;
+    }
+    :global(.js) .hh__copy > :nth-child(3) {
+      animation-delay: 190ms;
+    }
+    :global(.js) .hh__copy > :nth-child(4) {
+      animation-delay: 290ms;
+    }
+    :global(.js) .hh__copy > :nth-child(5) {
+      animation-delay: 380ms;
+    }
+  }
+  @keyframes hh-draw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+  @keyframes hh-fade {
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes hh-glow {
+    to {
+      opacity: 0.45;
+    }
+  }
+  @keyframes hh-pulse {
+    50% {
+      transform: scale(1.5);
+      opacity: 0.4;
+    }
+  }
+  @keyframes hh-in {
+    from {
+      opacity: 0;
+      transform: translateY(18px);
+    }
+  }
+</style>
+
+<script>
+  import {
+    onPointerTilt,
+    onScrollProgress,
+    reducedMotion,
+  } from "../../lib/motion";
+
+  const hero = document.querySelector<HTMLElement>("[data-home-hero]");
+  if (hero && !reducedMotion()) {
+    const layers = [
+      ...hero.querySelectorAll<HTMLElement | SVGElement>("[data-depth]"),
+    ].map((el) => ({ el, depth: Number(el.dataset.depth) || 0 }));
+    const route = hero.querySelector<SVGPathElement>("[data-route]");
+    const rider = hero.querySelector<SVGGElement>("[data-rider]");
+    const total = route?.getTotalLength() ?? 0;
+
+    let scroll = 0;
+    let tiltX = 0;
+    let tiltY = 0;
+    // Rider position along the route, 0..1: rides in with the drawing, then follows the scroll.
+    let intro = 0;
+    const REST = 0.42;
+
+    const place = () => {
+      for (const { el, depth } of layers) {
+        const x = -tiltX * depth * 18;
+        const y = scroll * depth * 160 - tiltY * depth * 10;
+        el.style.transform = `translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, 0)`;
+      }
+      hero.style.setProperty("--night", scroll.toFixed(3));
+      if (route && rider && total) {
+        const at = Math.min(1, intro * REST + scroll * 1.25 * (1 - REST));
+        const p = route.getPointAtLength(at * total);
+        const ahead = route.getPointAtLength(Math.min(total, at * total + 6));
+        const angle =
+          (Math.atan2(ahead.y - p.y, ahead.x - p.x) * 180) / Math.PI;
+        rider.setAttribute(
+          "transform",
+          `translate(${p.x.toFixed(1)} ${p.y.toFixed(1)}) rotate(${angle.toFixed(1)})`,
+        );
+      }
+    };
+
+    // Intro: the rider rides from the start to the first bend while the road draws.
+    const start = performance.now() + 250;
+    const DURATION = 2600;
+    const ease = (t: number) =>
+      t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2;
+    const introFrame = (now: number) => {
+      intro = ease(Math.min(1, Math.max(0, (now - start) / DURATION)));
+      place();
+      if (intro < 1) requestAnimationFrame(introFrame);
+    };
+    requestAnimationFrame(introFrame);
+
+    onScrollProgress(
+      hero,
+      (p) => {
+        scroll = p;
+        place();
+      },
+      "exit",
+    );
+    onPointerTilt(hero, (x, y) => {
+      tiltX = x;
+      tiltY = y;
+      place();
+    });
+  }
+</script>

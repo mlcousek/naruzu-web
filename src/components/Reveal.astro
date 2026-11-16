@@ -1,0 +1,51 @@
+---
+/**
+ * Reveal-on-scroll primitive. Wraps content that fades and rises into place
+ * the first time it enters the viewport (IntersectionObserver, lib/motion.ts).
+ * Content is fully visible without JavaScript and under reduced motion.
+ *
+ *   <Reveal delay={120}><Card ... /></Reveal>
+ *   <Reveal as="li" effect="fade">...</Reveal>
+ */
+interface Props {
+  as?: "div" | "li" | "section" | "article" | "span";
+  /** Stagger in ms. */
+  delay?: number;
+  effect?: "rise" | "fade" | "scale";
+  class?: string;
+}
+const {
+  as: Tag = "div",
+  delay = 0,
+  effect = "rise",
+  class: className,
+} = Astro.props;
+---
+
+<Tag
+  class:list={["nz-reveal", className]}
+  data-reveal={effect}
+  style={delay ? `--nz-reveal-delay: ${delay}ms` : undefined}
+>
+  <slot />
+</Tag>
+
+<style is:global>
+  @media (prefers-reduced-motion: no-preference) {
+    .js [data-reveal]:not([data-revealed]) {
+      opacity: 0;
+    }
+    .js [data-reveal="rise"]:not([data-revealed]) {
+      transform: translateY(24px);
+    }
+    .js [data-reveal="scale"]:not([data-revealed]) {
+      transform: scale(0.96);
+    }
+    .js [data-reveal] {
+      transition:
+        opacity var(--nz-dur-slow) var(--nz-ease-out),
+        transform var(--nz-dur-slow) var(--nz-ease-out);
+      transition-delay: var(--nz-reveal-delay, 0ms);
+    }
+  }
+</style>

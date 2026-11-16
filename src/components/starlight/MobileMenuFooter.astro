@@ -1,0 +1,52 @@
+---
+/**
+ * Bottom of the docs mobile menu: the primary site destinations (the header
+ * only has room for them on wide screens). The theme toggle stays in the header.
+ */
+import { NAV } from "../../config/site";
+import { isCurrent, url } from "../../lib/url";
+
+const pathname = Astro.url.pathname;
+---
+
+<nav class="nz-mobile-footer" aria-label="Site">
+  <ul>
+    {NAV.map((item) => (
+      <li>
+        <a
+          href={url(item.href)}
+          aria-current={
+            isCurrent(pathname, item.href, item.section) ? "page" : undefined
+          }
+        >
+          {item.label}
+        </a>
+      </li>
+    ))}
+  </ul>
+</nav>
+
+<style>
+  .nz-mobile-footer {
+    border-top: 1px solid var(--sl-color-hairline);
+    padding-block: 0.5rem;
+  }
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  a {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--sl-color-gray-2);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  a[aria-current="page"] {
+    color: var(--sl-color-white);
+    box-shadow: inset 3px 0 var(--nz-accent);
+    padding-inline-start: 0.75rem;
+  }
+</style>

@@ -1,0 +1,183 @@
+---
+/**
+ * "How it works": trainer -> app -> world as three glass nodes joined by
+ * animated data pulses (SVG + CSS). The pulses stop under reduced motion; the
+ * text says everything the animation shows.
+ */
+interface Node {
+  label: string;
+  title: string;
+  text: string;
+  icon: "trainer" | "app" | "world";
+}
+interface Props {
+  nodes: [Node, Node, Node];
+  links: [string, string];
+}
+const { nodes, links } = Astro.props;
+---
+
+<ol class="flow" role="list">
+  {nodes.map((node, i) => (
+    <>
+      <li
+        class="flow__node"
+        data-reveal="rise"
+        style={`--nz-reveal-delay:${i * 140}ms`}
+      >
+        <div class="flow__icon" aria-hidden="true">
+          {node.icon === "trainer" && (
+            <svg viewBox="0 0 48 48">
+              <circle cx="14" cy="32" r="8" />
+              <path d="M14 32 L22 18 L32 18 M22 18 L28 32 L40 32 M30 12 L34 12 M32 12 L32 18" />
+              <path class="flow__wave" d="M40 10 q4 4 0 8 M43 7 q7 7 0 14" />
+            </svg>
+          )}
+          {node.icon === "app" && (
+            <svg viewBox="0 0 48 48">
+              <rect x="6" y="9" width="36" height="26" rx="4" />
+              <path d="M18 41 H30 M24 35 V41" />
+              <path class="flow__wave" d="M11 28 L17 22 L22 25 L30 16 L37 20" />
+            </svg>
+          )}
+          {node.icon === "world" && (
+            <svg viewBox="0 0 48 48">
+              <path d="M4 38 L16 20 L24 30 L32 16 L44 38 Z" />
+              <path class="flow__wave" d="M8 42 C 18 36 30 44 40 40" />
+              <circle cx="36" cy="10" r="4" />
+            </svg>
+          )}
+        </div>
+        <p class="nz-eyebrow">{node.label}</p>
+        <h3 class="flow__title">{node.title}</h3>
+        <p class="flow__text">{node.text}</p>
+      </li>
+      {i < 2 && (
+        <li class="flow__link">
+          <svg
+            viewBox="0 0 100 24"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <path class="flow__track" d="M2 12 H98" />
+            <path class="flow__pulse" d="M2 12 H98" pathLength="100" />
+          </svg>
+          <span class="flow__link-text">{links[i]}</span>
+        </li>
+      )}
+    </>
+  ))}
+</ol>
+
+<style>
+  .flow {
+    display: grid;
+    gap: var(--nz-space-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  @media (min-width: 64rem) {
+    .flow {
+      grid-template-columns:
+        1fr minmax(6rem, 0.4fr) 1fr minmax(6rem, 0.4fr)
+        1fr;
+      align-items: center;
+    }
+  }
+  .flow__node {
+    padding: var(--nz-space-5);
+    border: 1px solid var(--nz-line);
+    border-radius: var(--nz-radius-lg);
+    background: var(--nz-panel);
+    box-shadow: var(--nz-shadow);
+    height: 100%;
+  }
+  .flow__icon {
+    display: grid;
+    place-items: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    margin-bottom: var(--nz-space-4);
+    border-radius: 16px;
+    background: color-mix(in srgb, var(--nz-accent) 14%, transparent);
+  }
+  .flow__icon svg {
+    width: 2.25rem;
+    height: 2.25rem;
+    fill: none;
+    stroke: var(--nz-accent);
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .flow__icon .flow__wave {
+    stroke: var(--nz-mint);
+  }
+  .flow__title {
+    margin-top: var(--nz-space-2);
+    font-size: var(--nz-fs-h3);
+  }
+  .flow__text {
+    margin-top: var(--nz-space-2);
+    font-size: var(--nz-fs-sm);
+    color: var(--nz-muted);
+  }
+  .flow__link {
+    display: grid;
+    justify-items: center;
+    gap: var(--nz-space-1);
+    padding-block: var(--nz-space-2);
+  }
+  .flow__link svg {
+    width: 24px;
+    height: 56px;
+    transform: rotate(90deg);
+  }
+  @media (min-width: 64rem) {
+    .flow__link svg {
+      width: 100%;
+      height: 24px;
+      transform: none;
+    }
+  }
+  .flow__track {
+    stroke: var(--nz-line);
+    stroke-width: 3;
+    stroke-dasharray: 2 6;
+    fill: none;
+    vector-effect: non-scaling-stroke;
+  }
+  .flow__pulse {
+    stroke: var(--nz-accent);
+    stroke-width: 3;
+    stroke-linecap: round;
+    fill: none;
+    stroke-dasharray: 18 82;
+    stroke-dashoffset: 0;
+    vector-effect: non-scaling-stroke;
+  }
+  .flow__link-text {
+    font-size: var(--nz-fs-min);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--nz-muted);
+    text-align: center;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .flow__pulse {
+      /* A few passes only (WCAG 2.2.2: nothing moves on its own for more than 5 s). */
+      animation: flow-pulse 1600ms linear 3;
+    }
+  }
+  @keyframes flow-pulse {
+    from {
+      stroke-dashoffset: 100;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+</style>

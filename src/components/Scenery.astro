@@ -1,0 +1,59 @@
+---
+/**
+ * Responsive scenery artwork (AVIF + WebP, several widths) from
+ * src/assets/scenery. Decorative by default (alt=""); pass `alt` when the
+ * image carries meaning. Add new art with scripts/optimise-images.mjs and
+ * list it in website/ASSETS.md.
+ */
+import { Picture } from "astro:assets";
+import lakeRoad from "../assets/scenery/lake-road.webp";
+import startScene from "../assets/scenery/start-scene.webp";
+import forestRoad from "../assets/scenery/forest-road.webp";
+import coastalRoad from "../assets/scenery/coastal-road.webp";
+import alpineRouteData from "../assets/scenery/alpine-route-data.webp";
+import fjordData from "../assets/scenery/fjord-data.webp";
+
+export const SCENERY = {
+  "lake-road": lakeRoad,
+  "start-scene": startScene,
+  "forest-road": forestRoad,
+  "coastal-road": coastalRoad,
+  "alpine-route-data": alpineRouteData,
+  "fjord-data": fjordData,
+} as const;
+export type SceneryName = keyof typeof SCENERY;
+
+interface Props {
+  name: SceneryName;
+  alt?: string;
+  /** Above the fold: load eagerly with high priority (the LCP image). */
+  priority?: boolean;
+  sizes?: string;
+  class?: string;
+  position?: string;
+}
+
+const {
+  name,
+  alt = "",
+  priority = false,
+  sizes = "100vw",
+  class: className,
+  position = "center",
+} = Astro.props;
+---
+
+<Picture
+  src={SCENERY[name]}
+  alt={alt}
+  formats={["avif", "webp"]}
+  fallbackFormat="webp"
+  widths={[480, 800, 1200, 1600, 1920]}
+  sizes={sizes}
+  loading={priority ? "eager" : "lazy"}
+  decoding={priority ? "sync" : "async"}
+  fetchpriority={priority ? "high" : "auto"}
+  class={className}
+  style={`object-position: ${position}`}
+  quality={priority ? 62 : 68}
+/>

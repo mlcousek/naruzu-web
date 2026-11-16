@@ -1,0 +1,27 @@
+{
+  "name": "naruzu-web",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@10.32.1",
+  "type": "module",
+  "description": "The NARUZU website: marketing pages and documentation (Astro + Starlight). Not part of the app bundle.",
+  "scripts": {
+    "dev": "astro dev --host 127.0.0.1",
+    "build": "astro build",
+    "preview": "astro preview --host 127.0.0.1",
+    "check": "astro check && astro build && node scripts/check-links.mjs",
+    "check:links": "node scripts/check-links.mjs",
+    "images": "node scripts/optimise-images.mjs",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.12",
+    "@astrojs/starlight": "0.43.1",
+    "astro": "7.4.12",
+    "prettier-plugin-astro": "1.1.2",
+    "sharp": "0.35.5",
+    "starlight-sidebar-topics": "0.9.0",
+    "typescript": "5.9.3"
+  }
+}

@@ -1,0 +1,102 @@
+---
+/** Site footer with the same destinations as the nav. No contact details (epic constraint). */
+import BrandMark from "./BrandMark.astro";
+import { NAV, SITE } from "../config/site";
+import { url } from "../lib/url";
+
+const year = new Date().getFullYear();
+---
+
+<footer class="nz-footer">
+  <div class="nz-footer__inner nz-container nz-container--wide">
+    <div class="nz-footer__brand">
+      <BrandMark size={28} />
+      <p>
+        <strong>{SITE.name}</strong>
+        <span>{SITE.tagline}.</span>
+      </p>
+    </div>
+    <nav aria-label="Footer">
+      <ul>
+        {NAV.map((item) => (
+          <li>
+            <a href={url(item.href)}>{item.label}</a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+    <p class="nz-footer__legal">
+      &copy; {`${year} ${SITE.name}`}. Scenery artwork is illustrative. Map data
+      &copy; OpenStreetMap contributors.
+    </p>
+  </div>
+</footer>
+
+<style>
+  .nz-footer {
+    border-top: 1px solid var(--nz-line-soft);
+    background:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 120' fill='none' stroke='%2339717a' stroke-width='.8' opacity='.5'%3E%3Cpath d='M0 90 Q80 40 160 60 T320 40 T480 60 T600 30'/%3E%3Cpath d='M0 104 Q80 54 160 74 T320 54 T480 74 T600 44'/%3E%3Cpath d='M0 118 Q80 68 160 88 T320 68 T480 88 T600 58'/%3E%3C/svg%3E")
+        right bottom / min(900px, 100%) auto no-repeat,
+      var(--nz-bg-raised);
+  }
+  .nz-footer__inner {
+    display: grid;
+    gap: var(--nz-space-5);
+    grid-template-columns: 1fr;
+    padding-block: var(--nz-space-7);
+  }
+  .nz-footer__brand {
+    display: flex;
+    align-items: center;
+    gap: var(--nz-space-3);
+  }
+  .nz-footer__brand p {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 0.5rem;
+    color: var(--nz-muted);
+  }
+  .nz-footer__brand strong {
+    color: var(--nz-text);
+    letter-spacing: 0.24em;
+    font-weight: 600;
+  }
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--nz-space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  ul a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--nz-target);
+    padding-inline: 0.5rem;
+    color: var(--nz-text);
+    font-size: var(--nz-fs-sm);
+    text-decoration: none;
+  }
+  ul a:hover {
+    color: var(--nz-accent);
+    text-decoration: underline;
+  }
+  .nz-footer__legal {
+    color: var(--nz-muted);
+    font-size: var(--nz-fs-min);
+  }
+  @media (min-width: 60rem) {
+    .nz-footer__inner {
+      grid-template-columns: auto 1fr;
+      align-items: center;
+    }
+    nav {
+      justify-self: end;
+    }
+    .nz-footer__legal {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

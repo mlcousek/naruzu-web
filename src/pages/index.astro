@@ -1,0 +1,469 @@
+---
+/**
+ * Home (issue #595): animated hero, scroll-driven climb story, interactive
+ * feature tour with real beta screenshots, HUD demo, gallery with lightbox,
+ * how to get the beta, FAQ teaser. Every claim is checked against the beta
+ * build (career, races, Shop, Companions and training plans are off there).
+ */
+import Base from "../layouts/Base.astro";
+import Section from "../components/Section.astro";
+import Button from "../components/Button.astro";
+import Reveal from "../components/Reveal.astro";
+import Gallery from "../components/Gallery.astro";
+import HomeHero from "../components/home/HomeHero.astro";
+import ClimbStory from "../components/home/ClimbStory.astro";
+import FeatureTour, {
+  type TourStop,
+} from "../components/home/FeatureTour.astro";
+import HudDemo from "../components/home/HudDemo.astro";
+import { BETA_VERSION } from "../config/site";
+
+const stops: TourStop[] = [
+  {
+    id: "pair",
+    tab: "Trainer pairing",
+    title: "Pair once, then just ride",
+    text: "Devices has one card each for the smart trainer, power, cadence and heart rate. Pairing only reads your numbers; NARUZU changes resistance only after you ask it to take control.",
+    points: [
+      "Bluetooth trainers that speak the standard FTMS protocol",
+      "No trainer yet? The virtual trainer pedals for you",
+      "Remembers your devices and reconnects at start-up (Windows app)",
+    ],
+    shot: "devices",
+    href: "/docs/user/pairing-devices/",
+    linkText: "How pairing works",
+  },
+  {
+    id: "routes",
+    tab: "Routes and Quick Ride",
+    title: "A road for every mood",
+    text: "Browse built-in roads by distance and climbing, ride curated scenic routes, import your own GPX, or let Quick Ride find a real-road loop that fits the distance and climbing you ask for.",
+    points: [
+      "Filters for country, distance and climbing",
+      "Gradient-coloured profile before you start",
+      "Saved and prepared routes work offline",
+    ],
+    shot: "routes",
+    href: "/docs/user/routes-and-quick-ride/",
+    linkText: "Find your first road",
+  },
+  {
+    id: "workouts",
+    tab: "Workouts and ERG",
+    title: "Structured training, held for you",
+    text: "Pick a built-in session, build your own in the workout editor or import a .zwo file. In ERG mode the trainer holds the target watts, so you only have to keep pedalling.",
+    points: [
+      "Targets as a share of your FTP, worked out when you start",
+      "A guided ramp test to measure your FTP",
+      "Your workouts stay on this device",
+    ],
+    shot: "workouts",
+    href: "/docs/user/workouts-and-erg/",
+    linkText: "Train with a plan",
+  },
+  {
+    id: "hud",
+    tab: "Ride HUD",
+    title: "The numbers you want, nothing else",
+    text: "A clear metric bar over the road: power with its zone, speed, cadence, heart rate, W/kg, distance, grade and time. Choose up to ten metrics, three sizes and a preset that suits the ride.",
+    points: [
+      "Minimap with the route's elevation profile",
+      "Keyboard shortcuts for pause, lap, camera and HUD",
+      "Recorded on your device every second",
+    ],
+    shot: "ride-hud",
+    href: "/docs/user/ride-hud/",
+    linkText: "Read the ride screen",
+  },
+  {
+    id: "garage",
+    tab: "Garage",
+    title: "Make the rider yours",
+    text: "Turn a live 3D preview of your rider and bike, then change kit, accessories, body, frame and wheels. Looks only: appearance never changes your speed or power.",
+    points: [
+      "Five categories, changes save automatically",
+      "Frames and wheels that fit together",
+      "Export and restore your look",
+    ],
+    shot: "garage",
+    href: "/game/",
+    linkText: "Inside the Garage",
+  },
+];
+
+const gallery = [
+  { name: "home" as const, caption: "Home: three steps to your first ride" },
+  { name: "ride-hud" as const, caption: "Riding with the full HUD" },
+  { name: "route-detail" as const, caption: "Route profile before you ride" },
+  { name: "setup" as const, caption: "One Setup screen for every ride" },
+  { name: "start-line" as const, caption: "Waiting on the start line" },
+  { name: "hud-editor" as const, caption: "HUD size, accent and opacity" },
+  { name: "ride-summary" as const, caption: "Ride summary and FIT export" },
+  { name: "progress" as const, caption: "Progress and your riding record" },
+  { name: "mobile-home" as const, caption: "Home on a narrow screen" },
+];
+
+const faq = [
+  {
+    q: "Do I need a smart trainer?",
+    a: "No. The virtual trainer simulates power, heart rate and cadence so you can try a ride. Those rides are marked simulated and cannot set your FTP.",
+  },
+  {
+    q: "Which trainers work?",
+    a: "Bluetooth trainers that use the standard FTMS protocol are the target. Real-trainer behaviour is not yet verified with this beta, and no brand is declared compatible. ANT+ is not supported.",
+  },
+  {
+    q: "Does it work offline?",
+    a: "Yes for the virtual trainer, local routes, workouts, recording and FIT export once installed. Searching for new Quick Ride routes and downloading real terrain need the internet.",
+  },
+  {
+    q: "Where are my rides stored?",
+    a: "On your own device. Nothing is shared until you choose to export or upload a ride.",
+  },
+];
+---
+
+<Base
+  title="Indoor cycling on real roads"
+  description="NARUZU is an indoor cycling app in public beta: pair a smart trainer, ride real and scenic roads, follow workouts in ERG mode and keep every ride on your own computer."
+>
+  <HomeHero version={BETA_VERSION} />
+
+  <section class="home-pillars" aria-label="NARUZU at a glance">
+    <div class="nz-container nz-container--wide">
+      <ul class="home-pillars__list" role="list">
+        <Reveal as="li" delay={0}>
+          <strong>120</strong>
+          <span>
+            built-in roads in the beta, plus Quick Ride and your own GPX
+          </span>
+        </Reveal>
+        <Reveal as="li" delay={90}>
+          <strong>12</strong>
+          <span>ready workouts, including a guided FTP ramp test</span>
+        </Reveal>
+        <Reveal as="li" delay={180}>
+          <strong>1 s</strong>
+          <span>your ride is saved on your device every second</span>
+        </Reveal>
+        <Reveal as="li" delay={270}>
+          <strong>FIT</strong>
+          <span>export any ride and take it to the platform you use</span>
+        </Reveal>
+      </ul>
+    </div>
+  </section>
+
+  <ClimbStory
+    steps={[
+      {
+        title: "Pick a road",
+        text: "A built-in climb, a scenic ride, a Quick Ride loop or your own GPX file.",
+      },
+      {
+        title: "The world builds around it",
+        text: "Terrain, trees, towns and weather are drawn around the road while you ride.",
+      },
+      {
+        title: "Your trainer feels the grade",
+        text: "As the road steepens, a controlled trainer adds resistance; on the descent it eases off.",
+      },
+      {
+        title: "Keep every metre",
+        text: "The ride is saved as you go. Finish it, read the summary and export a FIT file.",
+      },
+    ]}
+  />
+
+  <Section
+    id="tour"
+    eyebrow="Feature tour"
+    title="See the app, screen by screen"
+    intro="Real screenshots from the public beta. Pick a feature to see what it does."
+    width="wide"
+    tone="raised"
+  >
+    <FeatureTour stops={stops} />
+  </Section>
+
+  <Section
+    id="hud-demo"
+    eyebrow="Try it here"
+    title="Play with a ride screen"
+    intro="Move the sliders and watch speed, W/kg, the power zone colour and the elevation line respond. This is a small demo with a simplified model, not the app and not real ride data."
+    width="wide"
+  >
+    <HudDemo />
+  </Section>
+
+  <Section
+    id="gallery"
+    eyebrow="Gallery"
+    title="Screens from the beta"
+    intro="Captured from version 0.1.0-beta.1. Select a screenshot to see it larger; use the arrow keys to move between them."
+    width="wide"
+    tone="raised"
+  >
+    <Gallery items={gallery} />
+  </Section>
+
+  <Section
+    id="get-it"
+    eyebrow="Get NARUZU"
+    title="How to get the beta"
+    width="wide"
+  >
+    <div class="get">
+      <Reveal class="get__card get__card--main">
+        <p class="get__status">
+          <span aria-hidden="true"></span> Closed beta · {BETA_VERSION}
+        </p>
+        <h3>Shared personally, for now</h3>
+        <p>
+          There is no public download yet. The beta is passed on personally to a
+          small group of testers, as a Windows installer or a portable ZIP with
+          a checksum list. If you know the people running the beta, ask them for
+          access.
+        </p>
+        <p>
+          When you have a copy, the User guide walks you through installing it,
+          the Windows warning for an unsigned build, and your first ride.
+        </p>
+        <div class="get__actions">
+          <Button href="/docs/user/install/">How to install</Button>
+          <Button href="/about/" variant="secondary">
+            About the app
+          </Button>
+        </div>
+      </Reveal>
+      <Reveal class="get__card" delay={120}>
+        <h3>What you need</h3>
+        <dl class="get__list">
+          <div>
+            <dt>Computer</dt>
+            <dd>
+              Windows 10 or 11, 64-bit. Linux packages exist but are untested on
+              a desktop.
+            </dd>
+          </div>
+          <div>
+            <dt>Graphics</dt>
+            <dd>A graphics card and driver with WebGPU or WebGL 2.</dd>
+          </div>
+          <div>
+            <dt>Trainer</dt>
+            <dd>
+              A Bluetooth FTMS smart trainer, or none: use the virtual trainer.
+            </dd>
+          </div>
+          <div>
+            <dt>Internet</dt>
+            <dd>Only for new route searches and first terrain downloads.</dd>
+          </div>
+        </dl>
+      </Reveal>
+    </div>
+  </Section>
+
+  <Section id="faq" eyebrow="Questions" title="Asked before" tone="raised">
+    <div class="faq">
+      {faq.map((item, i) => (
+        <Reveal delay={i * 60}>
+          <details class="faq__item">
+            <summary>{item.q}</summary>
+            <p>{item.a}</p>
+          </details>
+        </Reveal>
+      ))}
+    </div>
+    <p class="faq__more">
+      <Button href="/docs/user/faq/" variant="quiet">
+        More answers in the User guide →
+      </Button>
+    </p>
+  </Section>
+</Base>
+
+<style>
+  .home-pillars {
+    position: relative;
+    z-index: 1;
+    margin-top: -3.5rem;
+  }
+  .home-pillars__list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border: 1px solid var(--nz-line);
+    border-radius: var(--nz-radius-lg);
+    background: var(--nz-glass);
+    backdrop-filter: blur(14px) saturate(1.2);
+    -webkit-backdrop-filter: blur(14px) saturate(1.2);
+    box-shadow: var(--nz-shadow);
+  }
+  @media (min-width: 64rem) {
+    .home-pillars__list {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+  .home-pillars__list > :global(li) {
+    display: grid;
+    align-content: start;
+    gap: 0.25rem;
+    padding: var(--nz-space-5);
+  }
+  .home-pillars__list > :global(li + li) {
+    border-left: 1px solid var(--nz-line-soft);
+  }
+  @media (max-width: 63.99rem) {
+    .home-pillars__list > :global(li:nth-child(3)) {
+      border-left: 0;
+    }
+    .home-pillars__list > :global(li:nth-child(n + 3)) {
+      border-top: 1px solid var(--nz-line-soft);
+    }
+  }
+  .home-pillars strong {
+    font-family: var(--nz-font-display);
+    font-size: clamp(1.75rem, 1.3rem + 1.6vw, 2.75rem);
+    font-weight: 600;
+    line-height: 1;
+    color: var(--nz-accent);
+  }
+  .home-pillars span {
+    font-size: var(--nz-fs-sm);
+    color: var(--nz-muted);
+  }
+
+  .get {
+    display: grid;
+    gap: var(--nz-space-5);
+  }
+  @media (min-width: 64rem) {
+    .get {
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    }
+  }
+  .get :global(.get__card) {
+    padding: var(--nz-space-6);
+    border: 1px solid var(--nz-line);
+    border-radius: var(--nz-radius-lg);
+    background: var(--nz-panel);
+    box-shadow: var(--nz-shadow);
+  }
+  .get :global(.get__card--main) {
+    background:
+      radial-gradient(
+        40rem 20rem at 100% 0%,
+        color-mix(in srgb, var(--nz-accent) 14%, transparent),
+        transparent 70%
+      ),
+      var(--nz-panel);
+  }
+  .get h3 {
+    margin-top: var(--nz-space-3);
+    font-family: var(--nz-font-display);
+    font-size: var(--nz-fs-h3);
+    font-weight: 600;
+  }
+  .get :global(.get__card) > h3:first-child {
+    margin-top: 0;
+  }
+  .get p {
+    margin-top: var(--nz-space-3);
+    color: var(--nz-muted);
+  }
+  .get__status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0 !important;
+    padding: 0.2rem 0.75rem;
+    border: 1px solid var(--nz-line);
+    border-radius: var(--nz-radius-pill);
+    font-size: var(--nz-fs-min);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--nz-text) !important;
+  }
+  .get__status span {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--nz-mint);
+  }
+  .get__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--nz-space-3);
+    margin-top: var(--nz-space-5);
+  }
+  .get__list {
+    display: grid;
+    gap: var(--nz-space-4);
+    margin: var(--nz-space-4) 0 0;
+  }
+  .get__list dt {
+    font-size: var(--nz-fs-min);
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--nz-accent);
+  }
+  .get__list dd {
+    margin: 0.15rem 0 0;
+    font-size: var(--nz-fs-sm);
+  }
+
+  .faq {
+    display: grid;
+    gap: var(--nz-space-3);
+    max-width: 52rem;
+  }
+  .faq__item {
+    border: 1px solid var(--nz-line);
+    border-radius: var(--nz-radius);
+    background: var(--nz-panel);
+  }
+  .faq__item summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--nz-space-3);
+    min-height: 3.25rem;
+    padding: var(--nz-space-3) var(--nz-space-5);
+    font-weight: 700;
+    cursor: pointer;
+    list-style: none;
+    border-radius: var(--nz-radius);
+  }
+  .faq__item summary::-webkit-details-marker {
+    display: none;
+  }
+  .faq__item summary::after {
+    content: "+";
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--nz-accent) 16%, transparent);
+    color: var(--nz-accent);
+    font-size: 1.15rem;
+    transition: transform var(--nz-dur) var(--nz-ease-out);
+  }
+  .faq__item[open] summary::after {
+    transform: rotate(45deg);
+  }
+  .faq__item p {
+    padding: 0 var(--nz-space-5) var(--nz-space-5);
+    color: var(--nz-muted);
+  }
+  .faq__more {
+    margin-top: var(--nz-space-5);
+  }
+</style>

@@ -1,0 +1,308 @@
+---
+/**
+ * Interactive feature tour: ARIA tabs (arrow keys, Home, End) that swap a real
+ * app screenshot and its story. Without JavaScript every panel is shown, one
+ * after another, so nothing is hidden.
+ */
+import Shot from "../Shot.astro";
+import { SHOT_ALT, type ShotName } from "../../lib/shots";
+import { url } from "../../lib/url";
+
+export interface TourStop {
+  id: string;
+  tab: string;
+  title: string;
+  text: string;
+  points: string[];
+  shot: ShotName;
+  href: string;
+  linkText: string;
+}
+interface Props {
+  stops: TourStop[];
+}
+const { stops } = Astro.props;
+---
+
+<div class="tour" data-tour>
+  <div
+    class="tour__tabs"
+    role="tablist"
+    aria-label="App features"
+    hidden
+    data-tablist
+  >
+    {stops.map((stop, i) => (
+      <button
+        type="button"
+        role="tab"
+        class="tour__tab"
+        id={`tour-tab-${stop.id}`}
+        aria-controls={`tour-panel-${stop.id}`}
+        aria-selected={i === 0 ? "true" : "false"}
+        tabindex={i === 0 ? 0 : -1}
+      >
+        <span class="tour__tab-num" aria-hidden="true">
+          {String(i + 1).padStart(2, "0")}
+        </span>
+        {stop.tab}
+      </button>
+    ))}
+  </div>
+  <div class="tour__panels">
+    {stops.map((stop, i) => (
+      <section
+        class="tour__panel"
+        id={`tour-panel-${stop.id}`}
+        aria-labelledby={`tour-title-${stop.id}`}
+        data-panel
+        data-first={i === 0 ? "" : undefined}
+      >
+        <div class="tour__copy">
+          <p class="nz-eyebrow">{stop.tab}</p>
+          <h3 class="tour__title" id={`tour-title-${stop.id}`}>
+            {stop.title}
+          </h3>
+          <p class="tour__text">{stop.text}</p>
+          <ul class="tour__points" role="list">
+            {stop.points.map((point) => (
+              <li>{point}</li>
+            ))}
+          </ul>
+          <a class="tour__link" href={url(stop.href)}>
+            {stop.linkText}
+            <span aria-hidden="true"> →</span>
+          </a>
+        </div>
+        <figure class="tour__frame">
+          <div class="tour__chrome" aria-hidden="true">
+            <span />
+            <span />
+            <span />
+          </div>
+          <Shot
+            name={stop.shot}
+            alt={SHOT_ALT[stop.shot]}
+            sizes="(min-width: 64rem) 56vw, 94vw"
+          />
+        </figure>
+      </section>
+    ))}
+  </div>
+</div>
+
+<style>
+  .tour__tabs {
+    display: flex;
+    gap: var(--nz-space-2);
+    margin-bottom: var(--nz-space-6);
+    padding: 0.35rem;
+    overflow-x: auto;
+    border: 1px solid var(--nz-line);
+    border-radius: var(--nz-radius);
+    background: var(--nz-panel);
+    scrollbar-width: thin;
+  }
+  .tour__tabs:not([hidden]) {
+    display: flex;
+  }
+  .tour__tab {
+    flex: 1 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    min-height: var(--nz-target);
+    padding: 0 1rem;
+    border: 1px solid transparent;
+    border-radius: var(--nz-radius-sm);
+    background: transparent;
+    color: var(--nz-muted);
+    font-size: var(--nz-fs-sm);
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+      color var(--nz-dur-fast) ease,
+      background-color var(--nz-dur-fast) ease;
+  }
+  .tour__tab:hover {
+    color: var(--nz-text);
+  }
+  .tour__tab[aria-selected="true"] {
+    background: var(--nz-accent);
+    color: var(--nz-on-accent);
+  }
+  .tour__tab-num {
+    font-family: var(--nz-font-data);
+    font-size: var(--nz-fs-min);
+  }
+  .tour__panels {
+    display: grid;
+  }
+  .tour__panel {
+    display: grid;
+    gap: var(--nz-space-6);
+    align-items: center;
+  }
+  .tour__panel + .tour__panel {
+    margin-top: var(--nz-space-8);
+  }
+  @media (min-width: 64rem) {
+    .tour__panel {
+      grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.5fr);
+    }
+  }
+  /* With JS the panels share one grid cell, so switching never shifts the layout. */
+  :global(.js) [data-tour][data-ready] .tour__panel {
+    grid-area: 1 / 1;
+    margin-top: 0;
+  }
+  :global(.js) [data-tour][data-ready] .tour__panel[hidden] {
+    display: grid;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .tour__title {
+    margin-top: var(--nz-space-3);
+    font-size: var(--nz-fs-h3);
+    line-height: 1.2;
+  }
+  .tour__text {
+    margin-top: var(--nz-space-3);
+    color: var(--nz-muted);
+  }
+  .tour__points {
+    display: grid;
+    gap: var(--nz-space-2);
+    margin: var(--nz-space-4) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .tour__points li {
+    position: relative;
+    padding-left: 1.5rem;
+    font-size: var(--nz-fs-sm);
+  }
+  .tour__points li::before {
+    content: "";
+    position: absolute;
+    left: 0.15rem;
+    top: 0.55em;
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+    border: 2px solid var(--nz-mint);
+  }
+  .tour__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: var(--nz-target);
+    margin-top: var(--nz-space-4);
+    font-weight: 700;
+  }
+  .tour__frame {
+    margin: 0;
+    overflow: hidden;
+    border: 1px solid var(--nz-line);
+    border-radius: var(--nz-radius-lg);
+    background: #031d25;
+    box-shadow: 0 30px 60px -30px #000c;
+  }
+  .tour__chrome {
+    display: flex;
+    gap: 0.4rem;
+    padding: 0.6rem 0.8rem;
+    border-bottom: 1px solid #ffffff1a;
+    background: #04232b;
+  }
+  .tour__chrome span {
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 50%;
+    background: #36565e;
+  }
+  .tour__frame :global(img) {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    object-position: top left;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    :global(.js) [data-tour][data-ready] .tour__panel {
+      transition:
+        opacity var(--nz-dur) var(--nz-ease-out),
+        visibility 0s linear var(--nz-dur);
+    }
+    :global(.js) [data-tour][data-ready] .tour__panel:not([hidden]) {
+      transition:
+        opacity var(--nz-dur-slow) var(--nz-ease-out),
+        visibility 0s;
+    }
+    :global(.js)
+      [data-tour][data-ready]
+      .tour__panel:not([hidden])
+      .tour__frame {
+      animation: tour-in var(--nz-dur-slow) var(--nz-ease-out);
+    }
+  }
+  @keyframes tour-in {
+    from {
+      transform: translateY(14px) scale(0.985);
+    }
+  }
+</style>
+
+<script>
+  for (const tour of document.querySelectorAll<HTMLElement>("[data-tour]")) {
+    const list = tour.querySelector<HTMLElement>("[data-tablist]")!;
+    const tabs = [...list.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+    const panels = [...tour.querySelectorAll<HTMLElement>("[data-panel]")];
+    panels.forEach((panel) => {
+      panel.setAttribute("role", "tabpanel");
+      panel.setAttribute("tabindex", "0");
+      panel.setAttribute("aria-labelledby", tabs[panels.indexOf(panel)]!.id);
+    });
+    const select = (index: number, focus = false) => {
+      tabs.forEach((tab, i) => {
+        const on = i === index;
+        tab.setAttribute("aria-selected", String(on));
+        tab.tabIndex = on ? 0 : -1;
+        panels[i]!.hidden = !on;
+        panels[i]!.toggleAttribute("inert", !on);
+      });
+      if (focus) tabs[index]!.focus({ preventScroll: true });
+      // Keep the chosen tab visible inside the strip only (never scroll the page).
+      const tab = tabs[index]!;
+      const left = tab.offsetLeft - list.offsetLeft;
+      if (left < list.scrollLeft) list.scrollLeft = left - 8;
+      else if (left + tab.offsetWidth > list.scrollLeft + list.clientWidth)
+        list.scrollLeft = left + tab.offsetWidth - list.clientWidth + 8;
+    };
+    tabs.forEach((tab, i) => {
+      tab.addEventListener("click", () => select(i));
+      tab.addEventListener("keydown", (event) => {
+        const last = tabs.length - 1;
+        const next =
+          event.key === "ArrowRight"
+            ? (i + 1) % tabs.length
+            : event.key === "ArrowLeft"
+              ? (i - 1 + tabs.length) % tabs.length
+              : event.key === "Home"
+                ? 0
+                : event.key === "End"
+                  ? last
+                  : -1;
+        if (next < 0) return;
+        event.preventDefault();
+        select(next, true);
+      });
+    });
+    list.hidden = false;
+    tour.setAttribute("data-ready", "");
+    select(0);
+  }
+</script>

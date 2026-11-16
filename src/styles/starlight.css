@@ -1,0 +1,127 @@
+/*
+ * Maps Starlight's variables onto the NARUZU tokens so the docs share the
+ * marketing pages' look (teal night, amber accent, mint ink, system faces).
+ * Loaded through `customCss` in astro.config.mjs.
+ */
+@import "./tokens.css";
+
+@layer starlight.base, starlight.reset, starlight.core, starlight.content, starlight.components, starlight.utils, nz;
+
+:root {
+  --sl-font: var(--nz-font-body);
+  --sl-font-mono: var(--nz-font-data);
+
+  --sl-color-white: var(--nz-text);
+  --sl-color-gray-1: #e3ece9;
+  --sl-color-gray-2: #c9d9dc; /* body text, 12.9:1 on --nz-bg */
+  --sl-color-gray-3: var(--nz-muted); /* 11.2:1 */
+  --sl-color-gray-4: #6f8f96;
+  --sl-color-gray-5: var(--nz-line);
+  --sl-color-gray-6: var(--nz-panel-strong);
+  --sl-color-black: var(--nz-bg);
+
+  --sl-color-accent-low: #3a2612;
+  --sl-color-accent: var(--nz-accent);
+  --sl-color-accent-high: #ffd2a6; /* links in dark mode, 13.0:1 */
+
+  --sl-color-bg-nav: var(--nz-bg-raised);
+  --sl-color-bg-sidebar: var(--nz-bg-raised);
+  --sl-color-bg-inline-code: var(--nz-panel-strong);
+  --sl-color-hairline-light: var(--nz-line);
+  --sl-color-hairline: #1d3d45;
+  --sl-color-hairline-shade: #01141a;
+
+  --sl-nav-height: 4rem;
+  --sl-text-2xs: 0.75rem; /* the 12 px floor */
+  --sl-menu-button-size: 2.75rem; /* 44 px target */
+}
+
+:root[data-theme="light"] {
+  --sl-color-white: var(--nz-text);
+  --sl-color-gray-1: #163c45;
+  --sl-color-gray-2: #1e434b; /* 9.4:1 on --nz-panel */
+  --sl-color-gray-3: var(--nz-muted);
+  --sl-color-gray-4: #5d7c83;
+  --sl-color-gray-5: var(--nz-line);
+  --sl-color-gray-6: #d3e3e1;
+  --sl-color-gray-7: var(--nz-bg-raised);
+  --sl-color-black: var(--nz-panel);
+
+  --sl-color-accent-low: #f6dcc6;
+  --sl-color-accent: var(--nz-accent);
+  --sl-color-accent-high: #7a3304; /* links, 7.6:1 on white */
+
+  --sl-color-bg-nav: var(--nz-bg);
+  --sl-color-bg-sidebar: var(--nz-bg);
+  --sl-color-bg-inline-code: #e3eeec;
+  --sl-color-hairline-light: #c5d8d7;
+  --sl-color-hairline: #c5d8d7;
+  --sl-color-hairline-shade: #c5d8d7;
+}
+
+@layer nz {
+  /* The docs headings borrow the app's display style: tight, heavy, amber full stop on h1. */
+  .content-panel h1#_top {
+    letter-spacing: -0.02em;
+    font-weight: 750;
+  }
+  .sl-markdown-content :is(h2, h3) {
+    letter-spacing: -0.01em;
+  }
+
+  /* Strong focus everywhere in the docs. */
+  :focus-visible {
+    outline: var(--nz-focus-ring);
+    outline-offset: var(--nz-focus-offset);
+  }
+
+  /* 44 px targets for sidebar and topic links. */
+  .sidebar-content a,
+  .sidebar-content summary,
+  starlight-toc a,
+  mobile-starlight-toc a,
+  mobile-starlight-toc summary,
+  .pagination-links a {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+  .sidebar-content a[aria-current="page"] {
+    background: var(--nz-panel-strong);
+    color: var(--nz-text);
+    box-shadow: inset 3px 0 var(--nz-accent);
+    font-weight: 700;
+  }
+  site-search button[data-open-modal] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Mobile menu button: the app's pill buttons rather than a white disc. */
+  .sl-menu-button,
+  :root[data-theme="light"] .sl-menu-button {
+    background-color: var(--nz-panel);
+    color: var(--nz-text);
+    border: 1px solid var(--nz-line);
+    box-shadow: none;
+  }
+  .sl-menu-button:hover {
+    border-color: var(--nz-accent);
+  }
+
+  /* No text below 12 px (Starlight uses 2xs for a few badges). */
+  .sl-badge,
+  kbd {
+    font-size: max(0.75rem, 1em);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

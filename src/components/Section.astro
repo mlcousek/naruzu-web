@@ -1,0 +1,91 @@
+---
+/**
+ * A page section: optional eyebrow, title (h2 by default) and intro, then the
+ * slot. `tone="raised"` gives a panel-coloured band; `width="wide"` uses the
+ * 1680 px measure.
+ *
+ *   <Section eyebrow="Workouts" title="Train with a plan" intro="...">...</Section>
+ */
+interface Props {
+  id?: string;
+  eyebrow?: string;
+  title?: string;
+  intro?: string;
+  as?: "h1" | "h2";
+  tone?: "plain" | "raised";
+  width?: "normal" | "wide";
+  align?: "start" | "center";
+  class?: string;
+}
+const {
+  id,
+  eyebrow,
+  title,
+  intro,
+  as: Heading = "h2",
+  tone = "plain",
+  width = "normal",
+  align = "start",
+  class: className,
+} = Astro.props;
+const headingId = id ? `${id}-title` : undefined;
+---
+
+<section
+  id={id}
+  class:list={[
+    "nz-section",
+    `nz-section--${tone}`,
+    `nz-section--${align}`,
+    className,
+  ]}
+  aria-labelledby={headingId}
+>
+  <div
+    class:list={["nz-container", { "nz-container--wide": width === "wide" }]}
+  >
+    {(eyebrow || title || intro) && (
+      <header class="nz-section__head">
+        {eyebrow && <p class="nz-eyebrow">{eyebrow}</p>}
+        {title && (
+          <Heading id={headingId} class="nz-section__title nz-dot">
+            {title}
+          </Heading>
+        )}
+        {intro && <p class="nz-section__intro">{intro}</p>}
+      </header>
+    )}
+    <slot />
+  </div>
+</section>
+
+<style>
+  .nz-section {
+    padding-block: var(--nz-space-8);
+  }
+  .nz-section--raised {
+    background:
+      linear-gradient(180deg, var(--nz-bg-raised), var(--nz-bg) 85%),
+      var(--nz-bg-raised);
+    border-block: 1px solid var(--nz-line-soft);
+  }
+  .nz-section__head {
+    max-width: 46rem;
+    margin-bottom: var(--nz-space-7);
+  }
+  .nz-section--center .nz-section__head {
+    margin-inline: auto;
+    text-align: center;
+  }
+  .nz-section__title {
+    margin-top: var(--nz-space-3);
+    font-size: var(--nz-fs-h2);
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+  }
+  .nz-section__intro {
+    margin-top: var(--nz-space-4);
+    font-size: var(--nz-fs-lead);
+    color: var(--nz-muted);
+  }
+</style>

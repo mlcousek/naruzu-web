@@ -1,0 +1,195 @@
+/*
+ * Base styles for the marketing pages (layouts/Base.astro). The docs use
+ * Starlight's own reset with starlight.css mapping its variables to the same
+ * tokens. Component styles live next to each component.
+ */
+@import "./tokens.css";
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-padding-top: calc(var(--nz-nav-h) + var(--nz-space-4));
+  background: var(--nz-bg);
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--nz-font-body);
+  font-size: var(--nz-fs-base);
+  line-height: var(--nz-lh-body);
+  color: var(--nz-text);
+  background: var(--nz-bg);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+main {
+  flex: 1 0 auto;
+}
+
+img,
+svg,
+video,
+picture {
+  display: block;
+  max-width: 100%;
+}
+img {
+  height: auto;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+  line-height: var(--nz-lh-snug);
+  text-wrap: balance;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+}
+p {
+  margin: 0;
+  text-wrap: pretty;
+}
+
+a {
+  color: var(--nz-accent);
+  text-underline-offset: 0.18em;
+  text-decoration-thickness: 1px;
+}
+a:hover {
+  color: var(--nz-accent-strong);
+  text-decoration-thickness: 2px;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+/* Strong, consistent focus (WCAG 2.2 2.4.7, 2.4.11, 2.4.13). */
+:focus-visible {
+  outline: var(--nz-focus-ring);
+  outline-offset: var(--nz-focus-offset);
+  border-radius: 4px;
+}
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+::selection {
+  background: var(--nz-accent);
+  color: var(--nz-on-accent);
+}
+
+/* Nothing on the site is smaller than 12 px. */
+small,
+.nz-small {
+  font-size: max(var(--nz-fs-min), 0.8em);
+}
+
+.nz-skip-link {
+  position: absolute;
+  z-index: 100;
+  inset-inline-start: var(--nz-space-4);
+  top: var(--nz-space-2);
+  min-height: var(--nz-target);
+  display: inline-flex;
+  align-items: center;
+  padding: 0 var(--nz-space-4);
+  border-radius: var(--nz-radius-sm);
+  background: var(--nz-accent);
+  color: var(--nz-on-accent);
+  font-weight: 700;
+  text-decoration: none;
+  transform: translateY(-200%);
+}
+.nz-skip-link:focus-visible {
+  transform: none;
+  color: var(--nz-on-accent);
+}
+
+.nz-visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Layout helpers shared by the components. */
+.nz-container {
+  width: min(100% - 2 * var(--nz-gutter), var(--nz-max));
+  margin-inline: auto;
+}
+.nz-container--wide {
+  width: min(100% - 2 * var(--nz-gutter), var(--nz-max-wide));
+}
+.nz-prose {
+  max-width: var(--nz-measure);
+}
+.nz-prose > * + * {
+  margin-top: 1em;
+}
+
+.nz-eyebrow {
+  display: inline-block;
+  font-size: var(--nz-fs-min);
+  font-weight: 700;
+  letter-spacing: var(--nz-tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--nz-muted);
+}
+
+/* The app's signature: the full stop after a page title is amber. */
+.nz-dot::after {
+  content: ".";
+  color: var(--nz-accent);
+}
+
+/* Glass panel (the app's --glass surfaces). */
+.nz-glass {
+  background: var(--nz-glass);
+  border: 1px solid var(--nz-line-soft);
+  border-radius: var(--nz-radius);
+  backdrop-filter: blur(12px) saturate(1.2);
+  -webkit-backdrop-filter: blur(12px) saturate(1.2);
+}
+
+/* Reduced motion: no transitions, animations or smooth scrolling anywhere. */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media (forced-colors: active) {
+  .nz-glass {
+    border-color: CanvasText;
+  }
+}

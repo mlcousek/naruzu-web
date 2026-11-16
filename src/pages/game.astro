@@ -1,0 +1,492 @@
+---
+/**
+ * About the game (issue #595): the riding world, Garage, workouts in the
+ * ride, the HUD and progression, as they are in the public beta. Career,
+ * races, the coin Shop, Companions (other riders and ghosts) and training
+ * plans are off in the beta and are not described here.
+ */
+import Base from "../layouts/Base.astro";
+import Hero from "../components/Hero.astro";
+import Section from "../components/Section.astro";
+import Button from "../components/Button.astro";
+import Reveal from "../components/Reveal.astro";
+import Shot from "../components/Shot.astro";
+import AtmospherePreview from "../components/game/AtmospherePreview.astro";
+import HudCompare from "../components/game/HudCompare.astro";
+import { SHOT_ALT } from "../lib/shots";
+
+const worlds = [
+  {
+    label: "Generated",
+    title: "A world that grows around the road",
+    text: "On any route NARUZU builds terrain, forests, farmland or alpine slopes, villages and roadside detail as you ride. The same road always grows the same world.",
+  },
+  {
+    label: "Mapped",
+    title: "Real places from open map data",
+    text: "Prepare real terrain and mapped scenery for a route and the world follows OpenStreetMap: the buildings, land cover, streams, bridges and side roads around you.",
+  },
+  {
+    label: "Scenic",
+    title: "Curated roads with artwork",
+    text: "Scenic rides are hand-picked roads with their own artwork. The scenery is drawn around the road; it is an interpretation, not a copy of the real place.",
+  },
+];
+
+const life = [
+  [
+    "Roads",
+    "Wear, markings, gravel at corners, guard rails, retaining walls and hairpin plates on the big climbs.",
+  ],
+  [
+    "Towns",
+    "Mapped buildings with regional roofs, street furniture and town signs; no invented names.",
+  ],
+  [
+    "Life",
+    "Walkers on pavements, animals in the fields and some passing traffic on Balanced and High quality.",
+  ],
+  [
+    "Sky",
+    "Clear, rain, fog or snow; summer, autumn or winter; a fixed hour, your own clock or a speeded-up day.",
+  ],
+  [
+    "Cameras",
+    "Behind the rider, side, first person and cinematic, plus a photo mode from the pause sheet.",
+  ],
+];
+
+const garage = [
+  [
+    "Kit",
+    "Jersey and shorts presets such as Race, Endurance, Aero, Thermal and Club, with colours.",
+  ],
+  ["Accessories", "Helmet, glasses, gloves, socks and shoes."],
+  ["Body", "The rider's body and hair."],
+  [
+    "Frame",
+    "A light road frame, a relaxed road frame, gravel, time-trial or race frames.",
+  ],
+  [
+    "Wheels",
+    "Shallow spoked, mid-depth, deep-section, tri-spoke or a rear disc with a deep front, with colour and accent.",
+  ],
+];
+
+const progress = [
+  {
+    title: "Levels and XP",
+    text: "Finished trainer rides earn XP. Your level sits on the ride screen and in Progress.",
+  },
+  {
+    title: "Challenges and collections",
+    text: "Join a challenge, then ride. Daily and monthly goals, streaks and climb collections count rides finished after you join.",
+  },
+  {
+    title: "Globe of explored roads",
+    text: "Every road you ride is added to a globe, so you can see where your indoor kilometres have taken you.",
+  },
+  {
+    title: "Fitness and power curve",
+    text: "Your best efforts across durations and a fitness trend, built from the rides you finish.",
+  },
+];
+---
+
+<Base
+  title="The game"
+  description="The riding world inside NARUZU: generated and mapped scenery around real roads, weather and time of day, a Garage for your rider and bike, workouts in the ride and progression."
+>
+  <Hero
+    eyebrow="The game"
+    title="A world to ride, built around your road"
+    lead="Every route becomes a place: terrain, trees, towns and sky drawn around the road while you pedal. Then make the rider on it your own."
+    image="alpine-route-data"
+    imagePosition="center 55%"
+    size="compact"
+  >
+    <Button href="#world">Explore the world</Button>
+    <Button href="/docs/user/" variant="secondary">
+      Get started
+    </Button>
+  </Hero>
+
+  <Section
+    id="world"
+    eyebrow="The riding world"
+    title="Three ways to see a road"
+    intro="Pick a built-in climb, a scenic ride, a Quick Ride loop or your own GPX file. How the world looks depends on the road and the data behind it."
+    width="wide"
+  >
+    <ul class="worlds" role="list">
+      {worlds.map((item, i) => (
+        <Reveal as="li" delay={i * 100} class="worlds__item">
+          <span class="worlds__label">{item.label}</span>
+          <h3>{item.title}</h3>
+          <p>{item.text}</p>
+        </Reveal>
+      ))}
+    </ul>
+    <Reveal class="ride-shot" effect="scale">
+      <Shot
+        name="ride-hud"
+        alt={SHOT_ALT["ride-hud"]}
+        sizes="(min-width: 80rem) 1200px, 94vw"
+      />
+    </Reveal>
+  </Section>
+
+  <Section
+    eyebrow="Weather and time of day"
+    title="Ride at golden hour, or in the snow"
+    intro="The app lets you set the scenery, season, weather and world clock. Try the idea here: this is a picture with filters, not the 3D world."
+    width="wide"
+    tone="raised"
+  >
+    <AtmospherePreview />
+  </Section>
+
+  <Section
+    eyebrow="Alive, not busy"
+    title="Detail where you look"
+    intro="The world adds detail around the road and keeps it light enough to stay smooth; a lower quality setting draws less."
+    width="wide"
+  >
+    <dl class="life">
+      {life.map(([term, text], i) => (
+        <Reveal class="life__row" delay={i * 60}>
+          <dt>{term}</dt>
+          <dd>{text}</dd>
+        </Reveal>
+      ))}
+    </dl>
+  </Section>
+
+  <Section
+    id="garage"
+    eyebrow="Garage"
+    title="Make it yours"
+    intro="A live 3D preview of your rider and bike: drag it, or use the arrow keys, to turn it. Changes save automatically and are cosmetic only; they never change your speed or power."
+    width="wide"
+    tone="raised"
+  >
+    <div class="garage">
+      <Reveal class="garage__shot" effect="scale">
+        <Shot
+          name="garage"
+          alt={SHOT_ALT.garage}
+          sizes="(min-width: 64rem) 58vw, 94vw"
+        />
+      </Reveal>
+      <ol class="garage__list" role="list">
+        {garage.map(([title, text], i) => (
+          <Reveal as="li" delay={i * 70} class="garage__item">
+            <span class="garage__num" aria-hidden="true">
+              {String(i + 1).padStart(2, "0")}
+            </span>
+            <div>
+              <h3>{title}</h3>
+              <p>{text}</p>
+            </div>
+          </Reveal>
+        ))}
+      </ol>
+    </div>
+    <p class="garage__fine">
+      Some frames and wheels must match: if a wheelset does not fit a frame, the
+      Garage switches it and tells you why. You can export your look and restore
+      it later.
+    </p>
+  </Section>
+
+  <Section
+    eyebrow="Workouts in the ride"
+    title="Training that rides with you"
+    intro="Choose a workout in Setup and the road repeats until the session ends. A card shows the current step, the target in watts and the time left."
+    width="wide"
+  >
+    <div class="split">
+      <Reveal class="split__text">
+        <ul class="ticks" role="list">
+          <li>
+            <strong>ERG mode</strong> lets the trainer hold the target watts
+            whatever your cadence.
+          </li>
+          <li>
+            <strong>Intensity</strong> and <strong>Skip step</strong> sit in the
+            Details drawer (key D).
+          </li>
+          <li>
+            <strong>A gentle start</strong>: the load builds over a few seconds
+            once you are moving, and eases if your cadence drops very low.
+          </li>
+          <li>
+            <strong>The ramp test</strong> measures your FTP with one-minute
+            steps and a confidence grade; nothing changes until you apply it.
+          </li>
+          <li>
+            <strong>Your own sessions</strong>: build them in the editor or
+            import .zwo files.
+          </li>
+        </ul>
+        <p class="split__note">
+          ERG on a real trainer is not yet verified with this beta. Try it with
+          a light target first.
+        </p>
+      </Reveal>
+      <Reveal class="split__shot" effect="scale" delay={120}>
+        <Shot
+          name="start-line"
+          alt={SHOT_ALT["start-line"]}
+          sizes="(min-width: 64rem) 50vw, 94vw"
+        />
+      </Reveal>
+    </div>
+  </Section>
+
+  <Section
+    eyebrow="The HUD"
+    title="Read it at a glance, mid-effort"
+    intro="Up to ten metrics in the top bar, a minimap with the elevation profile, ride stats and your level. Choose Race, Minimal or Workout presets, three sizes, an accent colour and panel opacity. Drag the divide to compare sizes."
+    width="wide"
+    tone="raised"
+  >
+    <HudCompare />
+  </Section>
+
+  <Section
+    eyebrow="Progression"
+    title="A reason to come back"
+    intro="Progress lives on your device and grows with every finished ride."
+    width="wide"
+  >
+    <ul class="progress" role="list">
+      {progress.map((item, i) => (
+        <Reveal as="li" delay={(i % 4) * 80} class="progress__item">
+          <h3>{item.title}</h3>
+          <p>{item.text}</p>
+        </Reveal>
+      ))}
+    </ul>
+    <aside class="beta-note" aria-labelledby="beta-note-title">
+      <h3 id="beta-note-title">Not in the public beta</h3>
+      <p>
+        Career mode and race events, the coin Shop, riding with companions or
+        ghosts, and training plans are switched off in this beta. Real team,
+        rider and sponsor names are not included. This page only describes what
+        the beta has.
+      </p>
+    </aside>
+    <div class="cta">
+      <Button href="/docs/user/">Read the User guide</Button>
+      <Button href="/about/" variant="secondary">
+        About the app
+      </Button>
+    </div>
+  </Section>
+</Base>
+
+<style>
+  .worlds,
+  .progress {
+    display: grid;
+    gap: var(--nz-space-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  @media (min-width: 48rem) {
+    .worlds {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .progress {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 80rem) {
+    .progress {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+  .worlds :global(.worlds__item),
+  .progress :global(.progress__item) {
+    padding: var(--nz-space-5);
+    border: 1px solid var(--nz-line);
+    border-radius: var(--nz-radius);
+    background: var(--nz-panel);
+  }
+  .worlds h3,
+  .progress h3 {
+    margin-top: var(--nz-space-2);
+    font-size: var(--nz-fs-lead);
+  }
+  .progress h3 {
+    margin-top: 0;
+  }
+  .worlds p,
+  .progress p {
+    margin-top: var(--nz-space-2);
+    font-size: var(--nz-fs-sm);
+    color: var(--nz-muted);
+  }
+  .worlds__label {
+    display: inline-block;
+    padding: 0.1rem 0.6rem;
+    border-radius: var(--nz-radius-pill);
+    background: color-mix(in srgb, var(--nz-mint) 18%, transparent);
+    color: var(--nz-mint);
+    font-size: var(--nz-fs-min);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  :global(.ride-shot),
+  .garage :global(.garage__shot),
+  .split :global(.split__shot) {
+    overflow: hidden;
+    border: 1px solid var(--nz-line);
+    border-radius: var(--nz-radius-lg);
+    box-shadow: 0 30px 60px -30px #000c;
+  }
+  :global(.ride-shot) {
+    margin-top: var(--nz-space-6);
+  }
+  :global(.ride-shot) img,
+  .garage :global(img),
+  .split :global(img) {
+    width: 100%;
+    height: auto;
+  }
+
+  .life {
+    display: grid;
+    margin: 0;
+    border-top: 1px solid var(--nz-line);
+  }
+  .life :global(.life__row) {
+    display: grid;
+    gap: var(--nz-space-1) var(--nz-space-6);
+    padding-block: var(--nz-space-4);
+    border-bottom: 1px solid var(--nz-line);
+  }
+  @media (min-width: 48rem) {
+    .life :global(.life__row) {
+      grid-template-columns: 12rem 1fr;
+      align-items: baseline;
+    }
+  }
+  .life dt {
+    font-family: var(--nz-font-display);
+    font-size: var(--nz-fs-h3);
+    font-weight: 600;
+    color: var(--nz-accent);
+  }
+  .life dd {
+    margin: 0;
+    font-size: var(--nz-fs-base);
+  }
+
+  .garage,
+  .split {
+    display: grid;
+    gap: var(--nz-space-6);
+    align-items: center;
+  }
+  @media (min-width: 64rem) {
+    .garage {
+      grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+    }
+    .split {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    }
+  }
+  .garage__list {
+    display: grid;
+    gap: var(--nz-space-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .garage :global(.garage__item) {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--nz-space-4);
+    padding: var(--nz-space-4);
+    border: 1px solid var(--nz-line);
+    border-radius: var(--nz-radius);
+    background: var(--nz-panel);
+  }
+  .garage__num {
+    font-family: var(--nz-font-data);
+    font-weight: 700;
+    color: var(--nz-accent);
+  }
+  .garage h3 {
+    font-size: var(--nz-fs-base);
+  }
+  .garage p {
+    margin-top: 0.15rem;
+    font-size: var(--nz-fs-sm);
+    color: var(--nz-muted);
+  }
+  .garage__fine {
+    max-width: var(--nz-measure);
+    margin-top: var(--nz-space-5);
+    font-size: var(--nz-fs-sm);
+    color: var(--nz-muted);
+  }
+
+  .ticks {
+    display: grid;
+    gap: var(--nz-space-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .ticks li {
+    position: relative;
+    padding-left: 2rem;
+  }
+  .ticks li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.2em;
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 50%;
+    background:
+      no-repeat center / 0.75rem
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='none' stroke='%2314262b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2.5 6.5 5 9 9.5 3.5'/%3E%3C/svg%3E"),
+      var(--nz-mint);
+  }
+  .split__note {
+    margin-top: var(--nz-space-5);
+    padding: var(--nz-space-3) var(--nz-space-4);
+    border-left: 3px solid var(--nz-accent);
+    background: color-mix(in srgb, var(--nz-accent) 8%, transparent);
+    font-size: var(--nz-fs-sm);
+  }
+
+  .beta-note {
+    margin-top: var(--nz-space-6);
+    padding: var(--nz-space-5);
+    border: 1px dashed var(--nz-line);
+    border-radius: var(--nz-radius);
+  }
+  .beta-note h3 {
+    font-size: var(--nz-fs-base);
+  }
+  .beta-note p {
+    margin-top: var(--nz-space-2);
+    max-width: var(--nz-measure);
+    font-size: var(--nz-fs-sm);
+    color: var(--nz-muted);
+  }
+  .cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--nz-space-3);
+    margin-top: var(--nz-space-6);
+  }
+</style>

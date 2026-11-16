@@ -1,0 +1,43 @@
+---
+/**
+ * A real app screenshot from src/content/docs/docs/user/img (captured from the public
+ * beta build for the User guide), served as responsive AVIF + WebP.
+ * `alt` is required: screenshots carry meaning.
+ *
+ *   <Shot name="ride-hud" alt="The ride screen with ..." />
+ */
+import { Picture } from "astro:assets";
+import { SHOTS, type ShotName } from "../lib/shots";
+
+interface Props {
+  name: ShotName;
+  alt: string;
+  sizes?: string;
+  priority?: boolean;
+  class?: string;
+}
+
+const {
+  name,
+  alt,
+  sizes = "(min-width: 64rem) 50vw, 100vw",
+  priority = false,
+  class: className,
+} = Astro.props;
+const src = SHOTS[name];
+const widths = [360, 640, 960, 1280].filter((w) => w <= src.width);
+if (!widths.includes(src.width)) widths.push(src.width);
+---
+
+<Picture
+  src={src}
+  alt={alt}
+  formats={["avif", "webp"]}
+  fallbackFormat="webp"
+  widths={widths}
+  sizes={sizes}
+  loading={priority ? "eager" : "lazy"}
+  decoding="async"
+  quality={74}
+  class={className}
+/>
