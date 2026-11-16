@@ -1,4 +1,5 @@
 /** Site-wide names, copy and navigation. Paths are site-relative; render them with `url()`. */
+import { hasDeveloperDocs } from "./audience.mjs";
 export const SITE = {
   name: "NARUZU",
   tagline: "Indoor cycling on real roads",
@@ -27,5 +28,7 @@ export const NAV: NavItem[] = [
   { label: "About", href: "/about/" },
   { label: "The game", href: "/game/" },
   { label: "User guide", href: "/docs/user/", section: true },
-  { label: "Developer docs", href: "/docs/dev/", section: true },
+  ...(hasDeveloperDocs
+    ? [{ label: "Developer docs", href: "/docs/dev/", section: true }]
+    : []),
 ];

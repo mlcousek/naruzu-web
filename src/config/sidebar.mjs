@@ -8,6 +8,8 @@
 // Use `items` with explicit `{ label, slug }` entries or groups if a topic ever
 // needs a hand-ordered sidebar (https://starlight.astro.build/guides/sidebar/).
 
+import { hasDeveloperDocs } from "./audience.mjs";
+
 /** @type {import("starlight-sidebar-topics").StarlightSidebarTopicsUserConfig} */
 export const sidebarTopics = [
   {
@@ -17,11 +19,15 @@ export const sidebarTopics = [
     icon: "open-book",
     items: [{ autogenerate: { directory: "docs/user" } }],
   },
-  {
-    id: "dev",
-    label: "Developer docs",
-    link: "/docs/dev/",
-    icon: "seti:config",
-    items: [{ autogenerate: { directory: "docs/dev" } }],
-  },
+  ...(hasDeveloperDocs
+    ? [
+        {
+          id: "dev",
+          label: "Developer docs",
+          link: "/docs/dev/",
+          icon: "seti:config",
+          items: [{ autogenerate: { directory: "docs/dev" } }],
+        },
+      ]
+    : []),
 ];

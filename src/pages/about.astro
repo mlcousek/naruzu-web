@@ -1,8 +1,11 @@
 ---
 /**
  * About the app (issue #595): what NARUZU is, who it is for, its principles,
- * how it works, a modest roadmap (no promises, no dates), tech at a glance and credits.
+ * how it works, a modest roadmap (only planned work that is already
+ * specified; no promises, no dates), tech at a glance and credits
+ * (the project's asset ledger).
  */
+import { hasDeveloperDocs } from "../config/audience.mjs";
 import Base from "../layouts/Base.astro";
 import Hero from "../components/Hero.astro";
 import Section from "../components/Section.astro";
@@ -61,7 +64,7 @@ const principles = [
   },
 ];
 
-/** Work that exists today as an open change in the project roadmap. */
+/** Work that exists today as an planned change that is already specified. */
 const roadmap = [
   {
     area: "Hardware",
@@ -331,15 +334,16 @@ const credits = [
         ))}
       </dl>
       <Reveal class="tech__aside">
-        <h3>Built in the open, for the team</h3>
+        <h3>Built with engineering discipline</h3>
         <p>
           A pnpm monorepo with typecheck, lint, unit and end-to-end tests and a
-          performance budget for the world. The developer docs explain the
-          architecture, packages and how to build it.
+          performance budget for the world.
         </p>
-        <Button href="/docs/dev/" variant="secondary">
-          Developer docs
-        </Button>
+        {hasDeveloperDocs && (
+          <Button href="/docs/dev/" variant="secondary">
+            Developer docs
+          </Button>
+        )}
       </Reveal>
     </div>
   </Section>

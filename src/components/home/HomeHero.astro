@@ -9,6 +9,7 @@
  */
 import Scenery from "../Scenery.astro";
 import Button from "../Button.astro";
+import { hasDeveloperDocs } from "../../config/audience.mjs";
 
 interface Props {
   version: string;
@@ -111,9 +112,11 @@ const SUMMIT = { x: 1500, y: 470 };
       </p>
       <div class="hh__actions">
         <Button href="/docs/user/">Get started</Button>
-        <Button href="/docs/dev/" variant="secondary">
-          For developers
-        </Button>
+        {hasDeveloperDocs && (
+          <Button href="/docs/dev/" variant="secondary">
+            For developers
+          </Button>
+        )}
       </div>
       <p class="hh__note">
         Free during the beta. Windows first; trainer support is in testing.

@@ -1,6 +1,6 @@
 # NARUZU website
 
-Public website for [NARUZU](https://mlcousek.github.io/naruzu-web/), an indoor cycling app: ride real roads on a smart trainer, follow structured workouts and build a rider career. This repository holds the website and its public documentation only (Home, About the app, The game, User guide, Developer docs). The app itself is developed elsewhere and is not part of this repository.
+Public website for NARUZU, an indoor cycling app: ride real roads on a smart trainer, follow structured workouts and build a rider career. This repository holds the website and its public documentation only (Home, About the app, The game, User guide). The app itself is developed in a private repository and is not part of this one.
 
 Built with [Astro](https://astro.build) and [Starlight](https://starlight.astro.build) into a static folder (`dist/`). The built site loads no third-party scripts, fonts or trackers.
 
@@ -16,15 +16,10 @@ pnpm check      # astro check + build + link check
 
 ## Base path
 
-The site is built for `https://mlcousek.github.io/naruzu-web/` (base `/naruzu-web/`). Override at build time:
+Built for `https://mlcousek.github.io/naruzu-web/` (base `/naruzu-web/`). Override at build time with `SITE_BASE` and `SITE_URL`. GitHub Pages is not enabled and no deploy workflow is included yet. Never hard-code the base path: use `url()` from `src/lib/url.ts`.
 
-| Variable    | Default                      | Use                                                   |
-| ----------- | ---------------------------- | ----------------------------------------------------- |
-| `SITE_BASE` | `/naruzu-web/`               | Path the site is served under. `/` for a root domain. |
-| `SITE_URL`  | `https://mlcousek.github.io` | Origin for canonical URLs, OpenGraph and the sitemap. |
+## Licence
 
-GitHub Pages is not enabled and no deploy workflow is included yet. Never hard-code the base path: use `url()` from `src/lib/url.ts` in `.astro` files.
+All rights reserved, see [LICENSE](LICENSE). Image sources are listed in [ASSETS.md](ASSETS.md).
 
-## Assets and licence
-
-See [ASSETS.md](ASSETS.md) for every image's source. Site code is MIT; text and artwork are all rights reserved (see [LICENSE](LICENSE)). Map data credits are on the About page (OpenStreetMap contributors, ODbL).
+This repository is generated from the private project; do not edit it by hand.
