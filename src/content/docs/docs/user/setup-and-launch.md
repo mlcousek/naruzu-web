@@ -13,7 +13,8 @@ Every ride goes through one **Setup** screen. Open it from a route's **Ride this
 
 - **Road.** Shows the chosen road. Pick another with the Road row. **From (km)** and **To (km)** let you ride only a stretch of it.
 - **Workout.** "No workout" is a free ride at your own pace. Choose a workout to ride its steps; the road repeats until the workout ends and targets use your FTP at the moment you start.
-- **Trainer.** Either **Virtual trainer** ("Simulated data. No trainer needed: it pedals for you.") or **Paired Bluetooth sensors**, which lists your trainer, power meter, heart rate and cadence. If a Bluetooth ride needs something (a fresh power source, or an ERG-capable trainer with control requested), Setup tells you and links to Devices.
+- **Trainer.** Either **Virtual trainer** ("Simulated data. No trainer needed: it pedals for you."; pick it and a **Simulator seed** appears, the same seed replays the same simulated power, heart rate and dropouts) or **Paired Bluetooth sensors**, which lists your trainer, power meter, heart rate and cadence. If a Bluetooth ride needs something (a fresh power source, or an ERG-capable trainer with control requested), Setup tells you and links to Devices. If trainer control is switched off, Setup warns that an ERG workout cannot start and offers **Turn trainer control on**.
+- **Repeat last ride.** Reloads the previous road and workout. A deleted road keeps your current setup and shows a message; an edited workout rides as it is now, and a deleted one is left out with a message.
 
 If you never set your weight and FTP, a banner says "Using default weight 75 kg and FTP 250 W. Set yours". See [Ramp test and FTP](/naruzu-web/docs/user/ramp-test-and-ftp/).
 

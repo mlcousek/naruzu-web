@@ -7,7 +7,9 @@ sidebar:
 
 ## Sign in
 
-Sign-in is required unless the app was built for riders without an account server. The sign-in screen offers an email and password, **Forgot password?** and **Create an account**, and a language switch (English or Čeština).
+**Public beta:** there are no accounts and no login. The first screen keeps the NARUZU artwork and language switch (English or Čeština) and shows a single **RIDE** button that opens the app. No account server is contacted, and the sign-in, **Forgot password?** and **Create an account** options described below do not exist in the beta. Your rides and settings stay on your device.
+
+In the full (private) build, sign-in is required unless the app was built for riders without an account server. The sign-in screen offers an email and password, **Forgot password?** and **Create an account**, and a language switch (English or Čeština).
 
 ![The NARUZU sign-in screen with email and password fields.](./img/sign-in.webp)
 
@@ -19,7 +21,7 @@ Things to know about accounts (from the project's account notes):
 - Your rides always stay on your device. A new account is private by default: it cannot be found by handle, rides are private and raw ride data is not shared.
 - Riding works offline. Account changes need a connection. If a device is offline for more than 30 days you must sign in again; the data on the device is kept.
 
-**Not yet verified for the public beta:** how and where public riders obtain an account, and which account server the public build talks to. The app looks for its server at a build-time address. Check the release notes that came with your copy.
+The account flow is kept in the code behind the build profile and is switched on again for a later release. The public beta does not need an account server.
 
 ## The first-run wizard
 
@@ -42,6 +44,6 @@ If you closed the app in the middle of a ride, Home offers **Recover unfinished 
 
 ## Navigation
 
-The left menu has six places: **Home**, **Ride**, **Garage**, **Progress**, **Devices** and **Settings**. Ride has the tabs Routes, Workouts and History. A search button at the top finds screens and routes.
+The left menu has six places: **Home**, **Ride**, **Garage**, **Progress**, **Devices** and **Settings**. Ride has the tabs Routes, Workouts, Plan, Stage races and History. A search button at the top finds screens and routes.
 
 _Last verified against version 0.1.0-beta.1._

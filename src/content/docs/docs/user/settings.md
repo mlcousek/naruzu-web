@@ -45,9 +45,9 @@ Changes save automatically and apply to your next view of the ride world.
 
 ## Advanced
 
-![Settings, Advanced with simulator seed, offline use and diagnostics.](./img/settings-advanced.webp)
+![Settings, Advanced with offline use and diagnostics.](./img/settings-advanced.webp)
 
-- **Virtual trainer, Simulator seed:** the same seed replays the same simulated power, heart rate and dropouts (mainly for testing).
+- The **Simulator seed** (mainly for testing) now lives in [Setup](/naruzu-web/docs/user/setup-and-launch/), under the Virtual trainer choice.
 - **Offline use** status.
 - **Export diagnostics** saves a small JSON file with app and storage status, what your machine supports and a short event log. It leaves out credentials, private routes and profile details, and is never uploaded: you send it yourself. Look inside before you share it.
 - **Graphics diagnostics:** ride once to measure the ride world on this device. Frame times describe the last ride on this device only.

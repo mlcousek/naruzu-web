@@ -26,7 +26,7 @@ The project says an item leaves this list only when it has been checked on the r
 - **Trainer control is unverified on real hardware.** Resistance response, control timing and a specific trainer model have not been ridden with this build.
 - **Heart-rate straps are unverified.** Tests pass; real devices have not been run.
 - **Builds are unsigned.** Windows SmartScreen warns; Linux shows no publisher.
-- **Career mode and races are off** by design.
+- **Career mode is off** by design. Race stage routes are available under generic names.
 - **iPhone install is unverified.**
 - **Not measured on a real range of GPUs.** Frame rate and smoothness limits come from one machine.
 - **Long rides are not endurance tested.** Six-hour and two-hour real-time rides have not been run.

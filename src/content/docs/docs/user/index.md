@@ -23,7 +23,7 @@ This guide covers the **public beta**. It tells you how to install the app, pair
 
 ## What is not in the public beta
 
-- Career mode, stage races and real race events are switched off. Event names are generic.
+- Career mode is switched off. Race stage routes are included, under generic names such as "France Grand Tour"; no real race or organiser name is used.
 - The coin Shop and the Companions (other riders and ghosts you can ride with) are **not in the public beta** and are not described in this guide.
 - Real team, rider and sponsor names are not included.
 - The app does not update itself. See [Install](/naruzu-web/docs/user/install/).
